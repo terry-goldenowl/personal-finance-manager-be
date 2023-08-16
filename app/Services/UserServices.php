@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Hash;
 
 class UserServices
 {
-    public static function create($data)
+    public function create($data)
     {
         try {
             $newUser = User::create($data);
@@ -17,7 +17,7 @@ class UserServices
         }
     }
 
-    public static function getUserByEmail($email)
+    public function getUserByEmail(string $email)
     {
         try {
             $user = User::where('email', $email)->first();
@@ -27,7 +27,7 @@ class UserServices
         }
     }
 
-    public static function getUser($id)
+    public function getUser(int $id)
     {
         try {
             $user = User::find($id);
@@ -37,7 +37,7 @@ class UserServices
         }
     }
 
-    public static function getUsers()
+    public function getUsers()
     {
         try {
             $users = User::all();
@@ -45,5 +45,10 @@ class UserServices
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+
+    public function updateUser($data, int $id)
+    {
+        User::find($id)->update($data);
     }
 }
