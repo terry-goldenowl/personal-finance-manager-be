@@ -7,19 +7,20 @@ use App\Mail\PasswordReset;
 use App\Models\User;
 use App\Services\UserServices;
 use Exception;
+use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules;
-use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
     function __construct(private UserServices $userServices)
     {
     }
+
     private function generateVerificationCode($length = 6)
     {
         $characters = '0123456789';
@@ -43,7 +44,7 @@ class AuthController extends Controller
 
             if ($validator->fails()) {
                 return response()->json([
-                    'message' => 'Validation failed',
+                    'status' => 'fail',
                     'error' =>  $validator->errors()
                 ]);
             }
@@ -57,23 +58,44 @@ class AuthController extends Controller
             $newUser = $this->userServices->create($userData);
 
             if (!$newUser) {
-                return response()->json(['error' => 'Can not register new user!'], 400);
+                return response()->json([
+                    'status' => 'fail',
+                    'error' => 'Can not register new user!'
+                ], 404);
             }
 
-            $verificationCode = $this->generateVerificationCode();
-
-            // Save user's verification code to db
-            $newUser->verification_code = $verificationCode;
-            $newUser->save();
-
-            Mail::to($newUser)->send(new EmailVerification($verificationCode));
-
             return response()->json([
-                'message' => 'Email verification code was sent'
-            ], 200);
+                'status' => 'success',
+                'message' => 'Register user successfully!'
+            ]);
         } catch (Exception $error) {
             return response()->json([
-                'message' => 'Something went wrong when registering!',
+                'status' => 'fail',
+                'error' => $error
+            ], 404);
+        }
+    }
+
+    public function sendVerificationCode(Request $request)
+    {
+        try {
+            $verificationCode = $this->generateVerificationCode();
+
+            $user = User::where('email', $request->email)->first();
+
+            // Save user's verification code to db
+            $user->verification_code = $verificationCode;
+            $user->save();
+
+            Mail::to($user)->send(new EmailVerification($verificationCode));
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Email verification code was sent'
+            ]);
+        } catch (Exception $error) {
+            return response()->json([
+                'status' => 'fail',
                 'error' => $error
             ], 404);
         }
@@ -92,17 +114,18 @@ class AuthController extends Controller
                 $user->save();
 
                 return response()->json([
+                    'status' => 'success',
                     'message' => 'Verification code is correct'
                 ]);
             } else {
                 return response()->json([
-                    'message' => 'Verification code is incorrect',
-                    'error' => 'error'
+                    'status' => 'fail',
+                    'error' => 'Verification code is incorrect'
                 ]);
             }
         } catch (Exception $error) {
             return response()->json([
-                'message' => 'Something went wrong',
+                'status' => 'fail',
                 'error' => $error
             ]);
         }
@@ -118,64 +141,131 @@ class AuthController extends Controller
 
             if ($validator->fails()) {
                 return response()->json([
-                    'message' => 'Invalid credentials',
-                    'error' => 'error'
-                ], 404);
+                    'status' => 'fail',
+                    'error' => 'Invalid credentials'
+                ]);
             }
 
             $user = $this->userServices->getUserByEmail($request->email);
 
             if (!$user) {
-                return response()->json(['message' => 'User not found!'], 404);
+                return response()->json([
+                    'status' => 'fail',
+                    'error' => 'User not found!'
+                ]);
             }
 
             if (!Hash::check($request->password, $user->password)) {
-                return response()->json(['message' => 'Password is not correct!'], 400);
+                return response()->json([
+                    'status' => 'fail',
+                    'error' => 'Password is not correct!'
+                ]);
             }
 
-            $token = $user->createToken('somedummytoken')->plainTextToken;
+            // Check if user has verified email
+            if ($user->is_verified == 0) {
+                return response()->json([
+                    'status' => 'fail',
+                    'error' => 'Email hasn\'t been verified yet!'
+                ]);
+            }
+
+            // $credentials = $request->only('email', 'password');
+            // $remember = $request->has('remember');
+
+            // return response()->json([
+            //     $credentials
+            // ]);
+            $token = $user->createToken(env('AUTH_TOKEN'))->plainTextToken;
 
             return response()->json([
-                'user' => $user,
-                'token' => $token
-            ], 201);
+                'status' => 'success',
+                'data' => [
+                    'user' => $user,
+                    'token' => $token
+                ]
+            ]);
         } catch (Exception $error) {
             return response()->json([
-                'message' => 'Something went wrong when loging in!',
-                'error' => $error
+                'status' => 'fail',
+                'error' => 'Something went wrong when login user!'
             ]);
         }
     }
 
     public function resetPassword(Request $request)
     {
-    }
+        try {
+            $validator = Validator::make($request->all(), [
+                'token' => 'required|string',
+                'newPassword' => 'required|string|confirmed|min:8',
+                'email' => 'required|string|email'
+            ]);
 
-    public function showResetPassword(Request $request,)
-    {
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'fail',
+                    'error' =>  $validator->errors()
+                ]);
+            }
+
+            $user = User::where('email', $request->email)->first();
+
+            $tokenExists = app(PasswordBroker::class)->tokenExists($user, $request->token);
+
+            if ($tokenExists) {
+                $user->password = Hash::make($request->newPassword);
+                $user->save();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Password is updated!'
+                ]);
+            } else {
+                return
+                    response()->json([
+                        'status' => 'fail',
+                        'message' => 'Token is invalid!'
+                    ]);
+            }
+        } catch (Exception $error) {
+            return response()->json([
+                'status' => 'fail',
+                'error' => $error
+            ]);
+        }
     }
 
     public function forgetPassword(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        try {
+            $request->validate(['email' => 'required|email']);
 
-        if (!User::where('email', $request->email)->exists()) {
+            if (!User::where('email', $request->email)->exists()) {
+                return response()->json([
+                    'status' => 'fail',
+                    'error' => 'User with this email does not exist!'
+                ]);
+            }
+
+            //  Generate random roken
+            // $token = Str::random(40);
+            $token = app(PasswordBroker::class)->createToken(User::where('email', $request->email)->first());
+
+            $resetLink = env('APP_FE_URL') . "/reset-password/" . $token;
+
+            Mail::to($request->only('email'))->send(new PasswordReset($resetLink));
+
             return response()->json([
-                'message' => 'User with this email does not exist!',
-                'error' => 'error'
+                'status' => 'success',
+                'message' => 'Password reset link was sent!',
+            ]);
+        } catch (Exception $error) {
+            return response()->json([
+                'status' => 'fail',
+                'error' => $error
             ]);
         }
-
-        //  Generate random roken
-        $token = Str::random(40);
-
-        $resetLink = env('APP_FE_URL') . "/reset-password/" . $token;
-
-        Mail::to($request->only('email'))->send(new PasswordReset($resetLink));
-
-        return response()->json([
-            'message' => 'Password reset link was sent!',
-        ]);
     }
 
     public function logout(Request $request)
@@ -184,11 +274,12 @@ class AuthController extends Controller
             auth()->user()->tokens()->delete();
 
             return response()->json([
+                'status' => 'success',
                 'message' => 'Logged out successfully!'
             ]);
         } catch (Exception $error) {
             return response()->json([
-                'message' => 'Something went wrong when loging out!',
+                'status' => 'fail',
                 'error' => $error
             ]);
         }
