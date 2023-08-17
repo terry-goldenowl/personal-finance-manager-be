@@ -22,6 +22,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('register');
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/verify', [AuthController::class, 'verify'])->name('verify');
+    Route::post('/send-verification-code', [AuthController::class, 'sendVerificationCode'])->name('send-verification-code');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('show-reset-password');
     Route::post('/forget-password', [AuthController::class, 'forgetPassword'])->name('forget-password');
