@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Helper;
 
+use App\Helpers\ReturnType;
 use App\Mail\EmailVerification;
 use App\Mail\PasswordReset;
 use App\Models\User;
@@ -9,16 +10,18 @@ use App\Services\UserServices;
 use Exception;
 use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules;
 
-class AuthController extends Controller
+class AuthHelper
 {
-    function __construct(private UserServices $userServices)
+
+    protected $userServices;
+    public function __construct(UserServices $userServices)
     {
+        $this->userServices = $userServices;
     }
 
     private function generateVerificationCode($length = 6)
@@ -43,10 +46,7 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'fail',
-                    'error' =>  $validator->errors()
-                ]);
+                return ReturnType::fail($validator->errors());
             }
 
             $userData = [
@@ -58,21 +58,12 @@ class AuthController extends Controller
             $newUser = $this->userServices->create($userData);
 
             if (!$newUser) {
-                return response()->json([
-                    'status' => 'fail',
-                    'error' => 'Can not register new user!'
-                ], 404);
+                return ReturnType::fail($validator->errors());
             }
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Register user successfully!'
-            ]);
+            return ReturnType::success('Register user successfully!');
         } catch (Exception $error) {
-            return response()->json([
-                'status' => 'fail',
-                'error' => $error
-            ], 404);
+            return ReturnType::fail($error);
         }
     }
 
@@ -83,21 +74,19 @@ class AuthController extends Controller
 
             $user = User::where('email', $request->email)->first();
 
+            if (!$user) {
+                return ReturnType::fail('User with this email not found!');
+            }
+
             // Save user's verification code to db
             $user->verification_code = $verificationCode;
             $user->save();
 
             Mail::to($user)->send(new EmailVerification($verificationCode));
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Email verification code was sent'
-            ]);
+            return ReturnType::success('Email verification code was sent!');
         } catch (Exception $error) {
-            return response()->json([
-                'status' => 'fail',
-                'error' => $error
-            ], 404);
+            return ReturnType::fail($error);
         }
     }
 
@@ -113,21 +102,12 @@ class AuthController extends Controller
                 $user->is_verified = 1;
                 $user->save();
 
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Verification code is correct'
-                ]);
+                return ReturnType::success("Verification code is correct!");
             } else {
-                return response()->json([
-                    'status' => 'fail',
-                    'error' => 'Verification code is incorrect'
-                ]);
+                return ReturnType::fail("Verification code is incorrect!");
             }
         } catch (Exception $error) {
-            return response()->json([
-                'status' => 'fail',
-                'error' => $error
-            ]);
+            return ReturnType::fail($error);
         }
     }
 
@@ -140,56 +120,32 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'fail',
-                    'error' => 'Invalid credentials'
-                ]);
+                return ReturnType::fail("Invalid credentials!");
             }
 
             $user = $this->userServices->getUserByEmail($request->email);
 
             if (!$user) {
-                return response()->json([
-                    'status' => 'fail',
-                    'error' => 'User not found!'
-                ]);
+                return ReturnType::fail("User not found!");
             }
 
             if (!Hash::check($request->password, $user->password)) {
-                return response()->json([
-                    'status' => 'fail',
-                    'error' => 'Password is not correct!'
-                ]);
+                return ReturnType::fail('Password is not correct!');
             }
 
             // Check if user has verified email
             if ($user->is_verified == 0) {
-                return response()->json([
-                    'status' => 'fail',
-                    'error' => 'Email hasn\'t been verified yet!'
-                ]);
+                return ReturnType::fail("Email hasn\'t been verified yet!");
             }
 
-            // $credentials = $request->only('email', 'password');
-            // $remember = $request->has('remember');
-
-            // return response()->json([
-            //     $credentials
-            // ]);
             $token = $user->createToken(env('AUTH_TOKEN'))->plainTextToken;
 
-            return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'user' => $user,
-                    'token' => $token
-                ]
+            return ReturnType::success('Login successfully!', [
+                'user' => $user,
+                'token' => $token
             ]);
         } catch (Exception $error) {
-            return response()->json([
-                'status' => 'fail',
-                'error' => 'Something went wrong when login user!'
-            ]);
+            return ReturnType::fail('Something went wrong when login user!');
         }
     }
 
@@ -203,10 +159,7 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'fail',
-                    'error' =>  $validator->errors()
-                ]);
+                return ReturnType::fail($validator->errors());
             }
 
             $user = User::where('email', $request->email)->first();
@@ -217,22 +170,12 @@ class AuthController extends Controller
                 $user->password = Hash::make($request->newPassword);
                 $user->save();
 
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Password is updated!'
-                ]);
+                return ReturnType::success("Password is updated!");
             } else {
-                return
-                    response()->json([
-                        'status' => 'fail',
-                        'message' => 'Token is invalid!'
-                    ]);
+                return ReturnType::fail("Token is invalid!");
             }
         } catch (Exception $error) {
-            return response()->json([
-                'status' => 'fail',
-                'error' => $error
-            ]);
+            return ReturnType::fail($error);
         }
     }
 
@@ -242,10 +185,7 @@ class AuthController extends Controller
             $request->validate(['email' => 'required|email']);
 
             if (!User::where('email', $request->email)->exists()) {
-                return response()->json([
-                    'status' => 'fail',
-                    'error' => 'User with this email does not exist!'
-                ]);
+                return ReturnType::fail('User with this email does not exist!');
             }
 
             //  Generate random roken
@@ -256,15 +196,9 @@ class AuthController extends Controller
 
             Mail::to($request->only('email'))->send(new PasswordReset($resetLink));
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Password reset link was sent!',
-            ]);
+            return ReturnType::success('Password reset link was sent!');
         } catch (Exception $error) {
-            return response()->json([
-                'status' => 'fail',
-                'error' => $error
-            ]);
+            return ReturnType::fail($error);
         }
     }
 
@@ -273,15 +207,9 @@ class AuthController extends Controller
         try {
             auth()->user()->tokens()->delete();
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Logged out successfully!'
-            ]);
+            return ReturnType::success('Logged out successfully!');
         } catch (Exception $error) {
-            return response()->json([
-                'status' => 'fail',
-                'error' => $error
-            ]);
+            return ReturnType::fail($error);
         }
     }
 }
