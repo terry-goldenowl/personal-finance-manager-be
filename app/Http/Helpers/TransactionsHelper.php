@@ -45,6 +45,7 @@ class TransactionsHelper
             $wallet = $request->has('wallet') ? $request->input("wallet") : null;
             $category = $request->has('category') ? $request->input("category") : null;
             $transactionType = $request->has('transaction_type') ? $request->input("transaction_type") : 'total';
+            $search = $request->has('search') ? $request->input("search") : null;
 
             // ALL TRANSACTIONS OF USER
             $query = Transaction::where('user_id', $request->user()->id);
@@ -81,6 +82,11 @@ class TransactionsHelper
                 $query->whereYear('date', $year);
             }
 
+            // TRANSACTIONS BY SEARCH - DESCRIPTION
+            if ($search) {
+                $query->whereRaw('LOWER(description) LIKE ?', '%' . strtolower($search) . '%');
+            }
+
             $transactions = $query->get();
 
             return ReturnType::success("", ['transactions' => $transactions]);
@@ -92,6 +98,7 @@ class TransactionsHelper
     public function update(CreateTransactionRequest $request)
     {
     }
+
     public function delete(Request $request, int $id)
     {
         try {
