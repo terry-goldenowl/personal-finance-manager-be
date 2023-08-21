@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\v1;
 use App\Helpers\ReturnType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Helper\AuthHelper;
+use App\Http\Helpers\AuthHelper;
 
 class AuthController extends Controller
 {
