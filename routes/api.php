@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CategoriesController;
+use App\Http\Controllers\Api\v1\PlansController;
 use App\Http\Controllers\Api\v1\ReportsController;
 use App\Http\Controllers\Api\v1\TransactionsController;
 use App\Http\Controllers\Api\v1\WalletsController;
@@ -57,6 +58,12 @@ Route::prefix('v1')->group(function () {
         Route::get('/reports', [ReportsController::class, 'get'])->name('get-reports');
 
         // Plans
-        
+        Route::post('/plans/month', [PlansController::class, 'createMonthPlan'])->name('create-month-plan');
+        Route::post('/plans/category', [PlansController::class, 'createCategoryPlan'])->name('create-category-plan');
+        Route::get('/plans', [PlansController::class, 'get'])->name('get-plans');
+        Route::patch('/plans/month/{id}', [PlansController::class, 'updateMonthPlan'])->name('update-month-plan');
+        Route::patch('/plans/category/{id}', [PlansController::class, 'updateCategoryPlan'])->name('update-category-plan');
+        Route::delete('/plans/month/{id}', [PlansController::class, 'deleteMonthPlan'])->name('delete-month-plan');
+        Route::delete('/plans/category/{id}', [PlansController::class, 'deleteCategoryPlan'])->name('delete-category-plan');
     });
 });
