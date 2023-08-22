@@ -64,4 +64,9 @@ class User extends Authenticatable implements CanResetPassword
         // return ($this->hasManyThrough(Transaction::class, Wallet::class));
         return $this->hasMany(Transaction::class);
     }
+
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
 }
