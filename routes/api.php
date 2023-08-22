@@ -55,5 +55,8 @@ Route::prefix('v1')->group(function () {
 
         // Reports
         Route::get('/reports', [ReportsController::class, 'get'])->name('get-reports');
+
+        // Plans
+        
     });
 });

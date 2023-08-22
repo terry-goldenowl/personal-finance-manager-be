@@ -18,19 +18,24 @@ class ReportsHelper
             $transactionType = $request->has('transaction_type') ? $request->input("transaction_type") : 'total';
             $reportType = $request->has('report_type') ? $request->input("report_type") : 'expenses-incomes';
 
+            // FILTER TRANSACTIONS BY USERS, YEARS
+            $transactions = $request->user()->transactions()->whereYear('date', $year);
+
+            // FILTER TRANSACTIONS BY WALLETS
+            if ($wallet) {
+                $transactions->where('wallet_id', $wallet);
+            }
+
             $transactionTotals = [];
             $categoriesTotals = [];
 
             // REPORTS BY YEAR
             if ($year && !$month) {
                 foreach ($request->user()->categories as $category) {
-                    // FILTER TRANSACTIONS BY WALLET, YEAR
-                    $transactions = $category->transactions()
-                        ->where('wallet_id', $wallet)
-                        ->whereYear('date', $year)
-                        ->get();
+                    $transactionsY = clone $transactions;
+                    $transacs = $transactionsY->where('category_id', $category->id)->get();
 
-                    foreach ($transactions as $transaction) {
+                    foreach ($transacs as $transaction) {
                         $transactionDate = \DateTime::createFromFormat('Y-m-d', $transaction->date);
                         $month = $transactionDate->format('n');
 
@@ -57,14 +62,13 @@ class ReportsHelper
             // REPORTS BY MONTH
             if ($month && $year) {
                 foreach ($request->user()->categories as $category) {
-                    // FILTER TRANSACTIONS BY WALLET, YEAR, MONTH
-                    $transactions = $category->transactions()
-                        ->where('wallet_id', $wallet)
-                        ->whereYear('date', $year)
+                    $transactionsYM = clone $transactions;
+                    // FILTER TRANSACTIONS BY MONTH
+                    $transacs = $transactionsYM->where('category_id', $category->id)
                         ->whereMonth('date', $month)
                         ->get();
 
-                    foreach ($transactions as $transaction) {
+                    foreach ($transacs as $transaction) {
                         $transactionDate = \DateTime::createFromFormat('Y-m-d', $transaction->date);
                         $day = $transactionDate->format('j');
 
