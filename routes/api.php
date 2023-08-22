@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CategoriesController;
+use App\Http\Controllers\Api\v1\ReportsController;
 use App\Http\Controllers\Api\v1\TransactionsController;
 use App\Http\Controllers\Api\v1\WalletsController;
 use App\Http\Controllers\HomeController;
@@ -53,6 +54,6 @@ Route::prefix('v1')->group(function () {
         Route::delete('/transactions/{id}', [TransactionsController::class, 'delete'])->name('delete-transactions');
 
         // Reports
-        
+        Route::get('/reports', [ReportsController::class, 'get'])->name('get-reports');
     });
 });

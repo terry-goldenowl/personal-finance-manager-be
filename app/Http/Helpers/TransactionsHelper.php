@@ -17,7 +17,7 @@ class TransactionsHelper
     public function create(CreateTransactionRequest $request)
     {
         try {
-            $validated = $request->safe()->only(['wallet_id', 'category_id', 'amount', 'description', 'image', 'date']);
+            $validated = $request->safe()->only(['title', 'wallet_id', 'category_id', 'amount', 'description', 'image', 'date']);
 
             if (!!!Wallet::where('id', $request['wallet_id'])->exists()) {
                 return ReturnType::fail('Wallet not found!');
@@ -48,7 +48,7 @@ class TransactionsHelper
             $search = $request->has('search') ? $request->input("search") : null;
 
             // ALL TRANSACTIONS OF USER
-            $query = Transaction::where('user_id', $request->user()->id);
+            $query = $request->user()->transactions();
 
             // TRANSACTIONS BY CATEGORY
             if ($category) {
@@ -84,7 +84,8 @@ class TransactionsHelper
 
             // TRANSACTIONS BY SEARCH - DESCRIPTION
             if ($search) {
-                $query->whereRaw('LOWER(description) LIKE ?', '%' . strtolower($search) . '%');
+                $query->whereRaw('LOWER(description) LIKE ?', '%' . strtolower($search) . '%')
+                    ->orWhereRaw('LOWER(title) LIKE ?', '%' . strtolower($search) . '%');
             }
 
             $transactions = $query->get();

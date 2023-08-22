@@ -6,20 +6,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Transaction extends Model
+class Report extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        "title",
-        "amount",
-        "category_id",
-        "wallet_id",
-        "user_id",
-        "date",
-        "description",
-        "image"
+        'day',
+        'month',
+        'year',
+        'total_incomes',
+        'total_expenses',
+        'user_id',
+        'wallet_id',
+        'category_id'
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function wallet(): BelongsTo
     {
@@ -29,10 +34,5 @@ class Transaction extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 }
