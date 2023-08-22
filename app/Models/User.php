@@ -59,14 +59,24 @@ class User extends Authenticatable implements CanResetPassword
         return $this->hasMany(Wallet::class);
     }
 
-    public function transactions()
+    public function transactions(): HasMany
     {
         // return ($this->hasManyThrough(Transaction::class, Wallet::class));
         return $this->hasMany(Transaction::class);
     }
 
-    public function reports()
+    public function reports(): HasMany
     {
         return $this->hasMany(Report::class);
+    }
+
+    public function month_plans(): HasMany
+    {
+        return $this->hasMany(MonthPlan::class);
+    }
+
+    public function category_plans(): HasMany
+    {
+        return $this->hasMany(CategoryPlan::class);
     }
 }
