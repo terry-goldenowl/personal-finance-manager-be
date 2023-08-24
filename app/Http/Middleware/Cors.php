@@ -20,7 +20,7 @@ class Cors
         // Add CORS headers
         $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
         $response->headers->set('Access-Control-Allow-Methods', '*');
-        $response->headers->set('Access-Control-Allow-Headers', ['X-CSRF-Token', 'Authorization']);
+        $response->headers->set('Access-Control-Allow-Headers', ['X-CSRF-Token', 'Authorization', 'Content-Type']);
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
 
         return $response;
