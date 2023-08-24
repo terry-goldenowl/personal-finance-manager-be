@@ -37,8 +37,12 @@ class CategoriesHelper
     public function get(Request $request)
     {
         try {
-            $categories = $request->user()->categories()->get();
-            return ReturnType::success("Get categories successfully", ['categories' => $categories]);
+            $type = $request->has('type') ? $request->input('type') : null;
+            $categories = $request->user()->categories();
+            if ($type) {
+                $categories->where("type", $type);
+            }
+            return ReturnType::success("Get categories successfully", ['categories' => $categories->get()]);
         } catch (Exception $error) {
             return ReturnType::fail($error);
         }
