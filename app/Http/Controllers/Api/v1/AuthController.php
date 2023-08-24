@@ -6,6 +6,9 @@ use App\Helpers\ReturnType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Helpers\AuthHelper;
+use App\Http\Requests\Users\LoginRequest;
+use App\Http\Requests\Users\RegisterUserRequest;
+use App\Http\Requests\Users\ResetPasswordRequest;
 
 class AuthController extends Controller
 {
@@ -16,7 +19,7 @@ class AuthController extends Controller
         $this->authHelper = $authHelper;
     }
 
-    public function register(Request $request)
+    public function register(RegisterUserRequest $request)
     {
         $returnData = $this->authHelper->register($request);
         return ReturnType::response($returnData);
@@ -34,13 +37,13 @@ class AuthController extends Controller
         return ReturnType::response($returnData);
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
         $returnData = $this->authHelper->login($request);
         return ReturnType::response($returnData);
     }
 
-    public function resetPassword(Request $request)
+    public function resetPassword(ResetPasswordRequest $request)
     {
         $returnData = $this->authHelper->resetPassword($request);
         return ReturnType::response($returnData);

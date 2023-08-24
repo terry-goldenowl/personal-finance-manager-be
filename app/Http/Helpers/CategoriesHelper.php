@@ -4,22 +4,29 @@ namespace App\Http\Helpers;
 
 use App\Helpers\ReturnType;
 use App\Http\Requests\Categories\CreateCategoryRequest;
-use App\Models\Category;
+use App\Services\CategoryServices;
 use Exception;
 use Illuminate\Http\Request;
 
 class CategoriesHelper
 {
+    private CategoryServices $categoryServices;
+    public function __construct(CategoryServices $services)
+    {
+        $this->categoryServices = $services;
+    }
+
     public function create(CreateCategoryRequest $request)
     {
         try {
             $validated = $request->safe()->only(['name', 'image', 'type']);
 
-            if (Category::where(['user_id' => $request->user()->id, 'name' => $validated['name']])->exists()) {
+            $categoryData = array_merge($validated, ['user_id' => $request->user()->id]);
+            $newCategory = $this->categoryServices->create($categoryData);
+
+            if (!$newCategory) {
                 return ReturnType::fail('This category has been created before by this user!');
             }
-
-            $newCategory = Category::create(array_merge($validated, ['user_id' => $request->user()->id]));
 
             return ReturnType::success('Create category successfully!', ['category' => $newCategory]);
         } catch (Exception $error) {
@@ -40,15 +47,15 @@ class CategoriesHelper
     public function update(CreateCategoryRequest $request, int $id)
     {
         try {
-            $category = Category::find($id);
-            if (!$category) {
-                return ReturnType::fail('Category not found!');
+            $validated = $request->safe()->only(['name', 'image', 'type']);
+
+            $updated = $this->categoryServices->update($validated, $id);
+
+            if (!!!$updated) {
+                return ReturnType::fail('Update fails or category not found!');
             }
 
-            $validated = $request->safe()->only(['name', 'image', 'type']);
-            $category->update($validated);
-
-            return ReturnType::success('Update category successfully!', ['category' => $category]);
+            return ReturnType::success('Update category successfully!');
         } catch (Exception $error) {
             return ReturnType::fail($error);
         }
@@ -56,12 +63,10 @@ class CategoriesHelper
     public function delete(Request $request, int $id)
     {
         try {
-            $category = Category::find($id);
-            if (!$category) {
-                return ReturnType::fail('Category not found!');
+            $deleted = $this->categoryServices->delete($id);
+            if (!$deleted) {
+                return ReturnType::fail('Delete fails or category not found!');
             }
-
-            Category::destroy($id);
 
             return ReturnType::success('Delete category successfully!');
         } catch (Exception $error) {

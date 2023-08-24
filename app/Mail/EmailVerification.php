@@ -28,7 +28,7 @@ class EmailVerification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address(env('MAIL_FROM_ADDRESS'), 'Money Master'),
+            from: new Address(env('MAIL_FROM_ADDRESS', 'moneymaster@example.com'), env('MAIL_FROM_NAME')),
             subject: 'Email Verification - Money Master',
         );
     }

@@ -4,31 +4,28 @@ namespace App\Http\Helpers;
 
 use App\Helpers\ReturnType;
 use App\Http\Requests\Wallets\CreateWalletRequest;
-use App\Models\Wallet;
+use App\Services\WalletServices;
 use Exception;
 use Illuminate\Http\Request;
 
 class WalletsHelper
 {
+    private WalletServices $walletServices;
+    public function __construct(WalletServices $services)
+    {
+        $this->walletServices = $services;
+    }
+
     public function create(CreateWalletRequest $request)
     {
         try {
             $validated = $request->safe()->only(['name', 'image', 'default']);
 
+            $walletData = array_merge($validated, ['user_id' => $request->user()->id]);
+            $newWallet = $this->walletServices->create($walletData);
 
-            if (Wallet::where(['user_id' => $request->user()->id, 'name' => $validated['name']])->exists()) {
+            if (!$newWallet) {
                 return ReturnType::fail('This wallet has been created before by this user!');
-            }
-
-            $newWallet = Wallet::create(array_merge($validated, ['user_id' => $request->user()->id]));
-
-            if (Wallet::where('user_id', $request->user()->id)->count() <= 1) {
-                $newWallet->default = 1;
-                $newWallet->save();
-            } else {
-                if ($validated['default'] == true) {
-                    Wallet::where('user_id', $request->user()->id)->where('id', '!=', $newWallet->id)->update(['default' => 0]);
-                }
             }
 
             return ReturnType::success('Create wallet successfully!', ['wallet' => $newWallet]);
@@ -50,20 +47,15 @@ class WalletsHelper
     public function update(CreateWalletRequest $request, int $id)
     {
         try {
-            $wallet = Wallet::find($id);
-            if (!$wallet) {
-                return ReturnType::fail('Wallet not found!');
-            }
-
             $validated = $request->safe()->only(['name', 'image', 'default']);
 
-            $wallet->update($validated);
+            $updated = $this->walletServices->update($validated, $id, $request->user()->id);
 
-            if ($validated['default'] == true) {
-                Wallet::where('user_id', $request->user()->id)->where('id', '!=', $wallet->id)->update(['default' => 0]);
+            if (!!!$updated) {
+                return ReturnType::fail('Update fails or wallet not found!');
             }
 
-            return ReturnType::success('Update wallet successfully!', ['wallet' => $wallet]);
+            return ReturnType::success('Update wallet successfully!');
         } catch (Exception $error) {
             return ReturnType::fail($error);
         }
@@ -71,14 +63,12 @@ class WalletsHelper
     public function delete(Request $request, int $id)
     {
         try {
-            $wallet = Wallet::find($id);
-            if (!$wallet) {
-                return ReturnType::fail('Wallet not found!');
+            $deleted = $this->walletServices->delete($id);
+            if (!$deleted) {
+                return ReturnType::fail('Delete fails or wallet not found!');
             }
 
-            Wallet::destroy($id);
-
-            return ReturnType::success('Delete wallet successfully!');
+            return ReturnType::success('Delete category successfully!');
         } catch (Exception $error) {
             return ReturnType::fail($error);
         }

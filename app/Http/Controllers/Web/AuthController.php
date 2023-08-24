@@ -8,7 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\Controller;
-use App\Http\Helper\AuthHelper;
+use App\Http\Helpers\AuthHelper;
 
 class AuthController extends Controller
 {
