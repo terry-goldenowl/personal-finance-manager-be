@@ -3,17 +3,17 @@
 namespace App\Http\Helpers;
 
 use App\Helpers\ReturnType;
+use App\Http\Requests\Users\LoginRequest;
+use App\Http\Requests\Users\RegisterUserRequest;
+use App\Http\Requests\Users\ResetPasswordRequest;
 use App\Mail\EmailVerification;
 use App\Mail\PasswordReset;
-use App\Models\User;
 use App\Services\UserServices;
-use Exception;
 use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules;
+use Exception;
 
 class AuthHelper
 {
@@ -36,29 +36,20 @@ class AuthHelper
         return $code;
     }
 
-    public function register(Request $request)
+    public function register(RegisterUserRequest $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                "name" => ['required', 'string', 'max:50'],
-                "email" => ['required', 'string', 'email', 'unique:' . User::class],
-                "password" => ['required', 'confirmed', 'min:8', 'max:30', Rules\Password::defaults()]
-            ]);
-
-            if ($validator->fails()) {
-                return ReturnType::fail($validator->errors());
-            }
-
+            $validated = $request->safe()->only(['name', 'email', 'password']);
             $userData = [
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password)
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password'])
             ];
 
             $newUser = $this->userServices->create($userData);
 
             if (!$newUser) {
-                return ReturnType::fail($validator->errors());
+                return ReturnType::fail('Register user fail!');
             }
 
             return ReturnType::success('Register user successfully!');
@@ -70,14 +61,13 @@ class AuthHelper
     public function sendVerificationCode(Request $request)
     {
         try {
-            $verificationCode = $this->generateVerificationCode();
-
-            $user = User::where('email', $request->email)->first();
+            $user = $this->userServices->getUserByEmail($request->email);
 
             if (!$user) {
                 return ReturnType::fail('User with this email not found!');
             }
 
+            $verificationCode = $this->generateVerificationCode();
             // Save user's verification code to db
             $user->verification_code = $verificationCode;
             $user->save();
@@ -96,7 +86,7 @@ class AuthHelper
             $email = $request->get('email');
             $verificationCode = $request->get('verification_code');
 
-            $user = User::where(['email' => $email, 'verification_code' => $verificationCode])->first();
+            $user = $this->userServices->checkExistsByEmailAndCode($email, $verificationCode);
 
             if ($user) {
                 $user->is_verified = 1;
@@ -111,25 +101,18 @@ class AuthHelper
         }
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                "email" => ['required', 'string', 'email'],
-                "password" => ['required', Rules\Password::defaults()]
-            ]);
+            $validated = $request->safe()->only(['email', 'password']);
 
-            if ($validator->fails()) {
-                return ReturnType::fail("Invalid credentials!");
-            }
-
-            $user = $this->userServices->getUserByEmail($request->email);
+            $user = $this->userServices->getUserByEmail($validated['email']);
 
             if (!$user) {
                 return ReturnType::fail("User not found!");
             }
 
-            if (!Hash::check($request->password, $user->password)) {
+            if (!Hash::check($validated['password'], $user->password)) {
                 return ReturnType::fail('Password is not correct!');
             }
 
@@ -149,21 +132,12 @@ class AuthHelper
         }
     }
 
-    public function resetPassword(Request $request)
+    public function resetPassword(ResetPasswordRequest $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'token' => 'required|string',
-                'newPassword' => 'required|string|confirmed|min:8',
-                'email' => 'required|string|email'
-            ]);
+            $validated = $request->safe()->only(['token', 'email', 'newPassword']);
 
-            if ($validator->fails()) {
-                return ReturnType::fail($validator->errors());
-            }
-
-            $user = User::where('email', $request->email)->first();
-
+            $user = $this->userServices->getUserByEmail($validated['email']);
             $tokenExists = app(PasswordBroker::class)->tokenExists($user, $request->token);
 
             if ($tokenExists) {
@@ -184,13 +158,11 @@ class AuthHelper
         try {
             $request->validate(['email' => 'required|email']);
 
-            if (!User::where('email', $request->email)->exists()) {
+            if (!$this->userServices->checkExistsByEmail($request->email)) {
                 return ReturnType::fail('User with this email does not exist!');
             }
 
-            //  Generate random roken
-            // $token = Str::random(40);
-            $token = app(PasswordBroker::class)->createToken(User::where('email', $request->email)->first());
+            $token = app(PasswordBroker::class)->createToken($this->userServices->getUserByEmail($request->email));
 
             $resetLink = env('APP_FE_URL') . "/reset-password/" . $token;
 

@@ -4,30 +4,40 @@ namespace App\Http\Helpers;
 
 use App\Helpers\ReturnType;
 use App\Http\Requests\Transactions\CreateTransactionRequest;
-use App\Models\Category;
-use App\Models\Transaction;
-use App\Models\Wallet;
+use App\Services\CategoryServices;
+use App\Services\TransactionServices;
+use App\Services\WalletServices;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 
 class TransactionsHelper
 {
+    public function __construct(
+        private TransactionServices $transactionServices,
+        private CategoryServices $categoryServices,
+        private WalletServices $walletServices
+    ) {
+    }
+
     public function create(CreateTransactionRequest $request)
     {
         try {
             $validated = $request->safe()->only(['title', 'wallet_id', 'category_id', 'amount', 'description', 'image', 'date']);
 
-            if (!!!Wallet::where('id', $request['wallet_id'])->exists()) {
-                return ReturnType::fail('Wallet not found!');
-            }
-
-            if (!!!Category::where('id', $request['category_id'])->exists()) {
+            if (!$this->categoryServices->checkExistsById($validated['category_id']))
                 return ReturnType::fail('Category not found!');
-            }
 
-            $newTransaction = Transaction::create(array_merge($validated, ['user_id' => $request->user()->id]));
+            if (!$this->walletServices->checkExistsById($validated['wallet_id']))
+                return ReturnType::fail('Wallet not found!');
+
+            $transactionData = array_merge($validated, ['user_id' => $request->user()->id]);
+
+            $newTransaction = $this->transactionServices->create($transactionData);
+
+            if (!$newTransaction) {
+                return ReturnType::fail('Create transaction failed!');
+            }
 
             return ReturnType::success('Create transaction successfully!', ['transaction' => $newTransaction]);
         } catch (Exception $error) {
@@ -45,7 +55,7 @@ class TransactionsHelper
             $wallet = $request->has('wallet') ? $request->input("wallet") : null;
             $category = $request->has('category') ? $request->input("category") : null;
             $transactionType = $request->has('transaction_type') ? $request->input("transaction_type") : 'total';
-            $search = $request->has('search') ? $request->input("search") : null;
+            $search = $request->has('search') ? $request->input("search") : "";
 
             // ALL TRANSACTIONS OF USER
             $query = $request->user()->transactions();
@@ -82,13 +92,14 @@ class TransactionsHelper
                 $query->whereYear('date', $year);
             }
 
-            // TRANSACTIONS BY SEARCH - DESCRIPTION
-            if ($search) {
+            // TRANSACTIONS BY SEARCH - TITLE / DESCRIPTION
+            if (strlen($search) > 0) {
                 $query->whereRaw('LOWER(description) LIKE ?', '%' . strtolower($search) . '%')
                     ->orWhereRaw('LOWER(title) LIKE ?', '%' . strtolower($search) . '%');
+                // $query->where('description', 'LIKE', '%' . $search . '%')->orWhere('title', 'LIKE', '%' . $search . '%');
             }
 
-            $transactions = $query->get();
+            $transactions = $query->with('category')->get();
 
             return ReturnType::success("", ['transactions' => $transactions]);
         } catch (Exception $error) {
@@ -103,12 +114,10 @@ class TransactionsHelper
     public function delete(Request $request, int $id)
     {
         try {
-            $transaction = Transaction::find($id);
-            if (!$transaction) {
-                return ReturnType::fail('Transaction not found!');
+            $deleted = $this->transactionServices->delete($id);
+            if (!$deleted) {
+                return ReturnType::fail('Delete fails or transaction not found!');
             }
-
-            Transaction::destroy($id);
 
             return ReturnType::success('Delete transaction successfully!');
         } catch (Exception $error) {
