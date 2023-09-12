@@ -1,25 +1,25 @@
 <?php
 
-namespace App\Http\Helpers;
+namespace App\Http\Services;
 
 use App\Helpers\ReturnType;
+use App\Models\User;
 use Exception;
-use Illuminate\Http\Request;
 
-class ReportsHelper
+class ReportService
 {
-    public function get(Request $request)
+    public function get(User $user, array $inputs)
     {
         // Query by: date, month, year, category, wallet, report type (total/income/expense)
         try {
-            $month = $request->has('month') ? $request->input("month") : null;
-            $year = $request->has('year') ? $request->input("year") : null;
-            $wallet = $request->has('wallet') ? $request->input("wallet") : null;
-            $transactionType = $request->has('transaction_type') ? $request->input("transaction_type") : 'total';
-            $reportType = $request->has('report_type') ? $request->input("report_type") : 'expenses-incomes';
+            $month = isset($inputs['month']) ? $inputs["month"] : null;
+            $year = isset($inputs['year']) ? $inputs["year"] : null;
+            $wallet = isset($inputs['wallet']) ? $inputs["wallet"] : null;
+            $transactionType = isset($inpusts['transaction_type']) ? $inputs["transaction_type"] : 'total';
+            $reportType = isset($inputs['report_type']) ? $inputs["report_type"] : 'expenses-incomes';
 
             // FILTER TRANSACTIONS BY USERS, YEARS
-            $transactions = $request->user()->transactions()->whereYear('date', $year);
+            $transactions = $user->transactions()->whereYear('date', $year);
 
             // FILTER TRANSACTIONS BY WALLETS
             if ($wallet) {
@@ -31,24 +31,26 @@ class ReportsHelper
 
             // REPORTS BY YEAR
             if ($year && !$month) {
-                foreach ($request->user()->categories as $category) {
+                foreach ($user->categories as $category) {
+                    if ($category->transactions()->count() == 0) continue;
                     $transactionsY = clone $transactions;
                     $transacs = $transactionsY->where('category_id', $category->id)->get();
 
                     foreach ($transacs as $transaction) {
                         $transactionDate = \DateTime::createFromFormat('Y-m-d', $transaction->date);
-                        $month = $transactionDate->format('n');
+                        $transactionMonth = $transactionDate->format('n');
 
                         // REPORTS BY REPORT TYPE: TOTAL EXPENSES/INCOMES
                         if ($reportType == "expenses-incomes") {
-                            if (!!!isset($transactionTotals[$month][$category->type])) {
-                                $transactionTotals[$month][$category->type] = 0;
+                            if (!!!isset($transactionTotals[$transactionMonth][$category->type])) {
+                                $transactionTotals[$transactionMonth][$category->type] = 0;
                             }
 
-                            $transactionTotals[$month][$category->type] += $transaction->amount;
+                            $transactionTotals[$transactionMonth][$category->type] += $transaction->amount;
                         }
                         // // REPORTS BY REPORT TYPE: TOTAL AMOUNT PER CATEGORY
                         elseif ($reportType == "categories") {
+                            $categoriesTotals[$category->name] = $category;
                             if (!isset($categoriesTotals[$category->name][$category->type])) {
                                 $categoriesTotals[$category->name][$category->type] = 0;
                             }
@@ -61,7 +63,7 @@ class ReportsHelper
 
             // REPORTS BY MONTH
             if ($month && $year) {
-                foreach ($request->user()->categories as $category) {
+                foreach ($user->categories as $category) {
                     $transactionsYM = clone $transactions;
                     // FILTER TRANSACTIONS BY MONTH
                     $transacs = $transactionsYM->where('category_id', $category->id)
@@ -79,6 +81,7 @@ class ReportsHelper
 
                             $transactionTotals[$day][$category->type] += $transaction->amount;
                         } elseif ($reportType == "categories") {
+                            $categoriesTotals[$category->name] = $category;
                             if (!isset($categoriesTotals[$category->name][$category->type])) {
                                 $categoriesTotals[$category->name][$category->type] = 0;
                             }
@@ -104,7 +107,8 @@ class ReportsHelper
                 } elseif ($reportType == "categories") {
                     foreach ($categoriesTotals as $item => $total) {
                         if (isset($total[$transactionType])) {
-                            $filteredTotals[$item] = $total[$transactionType];
+                            $filteredTotals[$item] = $total;
+                            $filteredTotals[$item]['amount'] = $total[$transactionType];
                         }
                     }
 
@@ -113,7 +117,19 @@ class ReportsHelper
             } else {
                 if ($reportType == "categories") {
                     foreach ($categoriesTotals as $item => $total) {
-                        $categoriesTotals[$item] = array_values($total)[0];
+                        if (isset($total['expenses'])) {
+                            $categoriesTotals[$item]['amount'] = $total['expenses'];
+                        } else {
+                            $categoriesTotals[$item]['amount'] = $total['incomes'];
+                        }
+                    }
+                } else {
+                    foreach ($transactionTotals as $item => $total) {
+                        foreach (['expenses', 'incomes'] as $type) {
+                            if (!isset($transactionTotals[$item][$type])) {
+                                $transactionTotals[$item][$type] = 0;
+                            }
+                        }
                     }
                 }
             }

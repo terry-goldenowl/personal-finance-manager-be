@@ -27,7 +27,7 @@ class CreateWalletRequest extends FormRequest
     {
         return [
             'name' => 'string|required',
-            'image' => 'string|required',
+            'image' => 'required|file|mimes:jpeg,png,gif|max:2048',
             'default' => 'boolean|required'
         ];
     }

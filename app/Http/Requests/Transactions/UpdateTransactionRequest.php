@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
 
-class CreateTransactionRequest extends FormRequest
+class UpdateTransactionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,13 +26,13 @@ class CreateTransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'string|required',
-            'wallet_id' => 'numeric|required',
-            'category_id' => 'numeric|required',
-            'amount' => 'numeric|required|min:0',
-            'date' => 'date|required',
+            'title' => 'nullable|string',
+            'wallet_id' => 'nullable|numeric',
+            'category_id' => 'nullable|numeric',
+            'amount' => 'nullable|numeric|min:0',
+            'date' => 'nullable|date',
             'description' => 'nullable|string',
-            'image' => 'nullable|file|mimes:jpeg,png,gif|max:2048'
+            'image' => 'nullable|file|mimes:jpeg,jpg,png,gif|max:2048'
         ];
     }
 

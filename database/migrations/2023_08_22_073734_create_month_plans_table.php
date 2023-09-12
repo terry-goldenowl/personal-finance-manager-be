@@ -17,9 +17,11 @@ return new class extends Migration
             $table->integer('year');
             $table->double('amount')->default(0);
             $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('wallet_id');
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('wallet_id')->references('id')->on('wallets');
         });
     }
 

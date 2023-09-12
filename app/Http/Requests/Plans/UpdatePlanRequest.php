@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Transactions;
+namespace App\Http\Requests\Plans;
 
 use App\Helpers\ReturnType;
 use Illuminate\Contracts\Validation\Validator;
@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
 
-class CreateTransactionRequest extends FormRequest
+class UpdatePlanRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,13 +26,7 @@ class CreateTransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'string|required',
-            'wallet_id' => 'numeric|required',
-            'category_id' => 'numeric|required',
-            'amount' => 'numeric|required|min:0',
-            'date' => 'date|required',
-            'description' => 'nullable|string',
-            'image' => 'nullable|file|mimes:jpeg,png,gif|max:2048'
+            'amount' => 'numeric|required',
         ];
     }
 

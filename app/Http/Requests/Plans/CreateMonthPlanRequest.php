@@ -29,6 +29,7 @@ class CreateMonthPlanRequest extends FormRequest
             'month' => 'numeric|required',
             'year' => 'numeric|required',
             'amount' => 'numeric|required',
+            'wallet_id' => 'numeric|required'
         ];
     }
 
