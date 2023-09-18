@@ -135,6 +135,9 @@ You can now access the server at http://localhost:8000
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+## DB Diagram
+[![](https://mermaid.ink/img/pako:eNqN0dEKgjAUBuBXOZxre4HdjZIKTEMXEQxiuFNKmTHdRczePaUiMot2ez7O_7PjMC01IUMyk1ztjSrkCdq3SvwYmmY0ahyseRD4gkGmqt6wdDDmwp9G8ebLWMQ8TPhYzKOQQWpI1fSJFlEoZttlwH-YZ84Au_cbSAQGEm1FGnalkTikX9F_4LcOg_4p_i3T978T0MOCTKFy3R7MdRsk1hkVJLGjWplDx66tU7Yuk8spRVYbSx7as27_63FiZDt1rOh6AzyDmkE?type=png)](https://mermaid.live/edit#pako:eNqN0dEKgjAUBuBXOZxre4HdjZIKTEMXEQxiuFNKmTHdRczePaUiMot2ez7O_7PjMC01IUMyk1ztjSrkCdq3SvwYmmY0ahyseRD4gkGmqt6wdDDmwp9G8ebLWMQ8TPhYzKOQQWpI1fSJFlEoZttlwH-YZ84Au_cbSAQGEm1FGnalkTikX9F_4LcOg_4p_i3T978T0MOCTKFy3R7MdRsk1hkVJLGjWplDx66tU7Yuk8spRVYbSx7as27_63FiZDt1rOh6AzyDmkE)
+
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
