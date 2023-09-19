@@ -2,12 +2,11 @@
 
 namespace App\Http\Requests\Users;
 
-use App\Helpers\ReturnType;
+use App\Http\Helpers\ReturnType;
 use App\Models\User;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules;
 
 class RegisterUserRequest extends FormRequest

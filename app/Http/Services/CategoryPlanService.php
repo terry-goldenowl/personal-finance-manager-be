@@ -2,7 +2,9 @@
 
 namespace App\Http\Services;
 
-use App\Helpers\ReturnType;
+use App\Http\Helpers\FailedData;
+use App\Http\Helpers\ReturnType;
+use App\Http\Helpers\SuccessfulData;
 use App\Models\CategoryPlan;
 use App\Models\User;
 use Exception;
@@ -19,22 +21,26 @@ class CategoryPlanService extends BaseService
         $this->walletService = $walletService;
     }
 
-    public function create(User $user, array $data): array
+    public function create(User $user, array $data): object
     {
         try {
 
             if (!$this->walletService->checkExistsById($data['wallet_id']))
-                return ReturnType::fail('Wallet not found!');
+                return new FailedData('Wallet not found!');
 
             if (!$this->categoryService->checkExistsById($data['category_id'])) {
-                return ReturnType::fail('Category not found!');
+                return new FailedData('Category not found!');
             }
 
             if (isset($data['category_id'])) {
                 $category = $this->categoryService->getById($data['category_id']);
 
                 if ($category->default == 1) {
-                    $category = $this->categoryService->getWithSameName($category->id, $category->name);
+                    $userCategory = $this->categoryService->getWithSameName($user->id, $category->id, $category->name);
+
+                    if (!$userCategory) {
+                        $category = $this->categoryService->createBasedOnDefault($user->id, $category);
+                    }
                     $data['category_id'] = $category->id;
                 }
             }
@@ -42,52 +48,73 @@ class CategoryPlanService extends BaseService
             $planData = array_merge($data, ['user_id' => $user->id]);
 
             if ($this->checkExists($planData)) {
-                return ReturnType::fail('Plan is already exists!');
+                return new FailedData('Plan is already exists!');
             }
 
             $newPlan = $this->model::create($planData);
 
             if (!$newPlan) {
-                return ReturnType::fail('This plan has been set before by this user!');
+                return new FailedData('This plan has been set before by this user!');
             }
 
-            return ReturnType::success('Create category plan successfully!', ['plan' => $newPlan]);
+            return new SuccessfulData('Create category plan successfully!', ['plan' => $newPlan]);
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to create category plan!');
         }
     }
 
-    public function get(User $user, array $inputs)
+    public function get(User $user, array $inputs): object
     {
         try {
             $month = isset($inputs['month']) ? $inputs["month"] : null;
             $year = isset($inputs['year']) ? $inputs["year"] : null;
             $walletId = isset($inputs['wallet_id']) ? $inputs["wallet_id"] : null;
             $categoryId = isset($inputs['category_id']) ? $inputs["category_id"] : null;
+            $withReport = isset($inputs['with_report']) ? $inputs["with_report"] : null;
 
             $plans = $user->category_plans()->where('month', $month)->where('year', $year)->where('wallet_id', $walletId)->with('category');
 
-            if ($categoryId) {
+            if ($categoryId && $plans->count() > 0) {
                 $category = $this->categoryService->getById($categoryId);
                 if ($category->default == 1) {
-                    $category = $this->categoryService->getWithSameName($categoryId, $category->name);
+                    $category = $this->categoryService->getWithSameNameOfUser($user->id, $categoryId, $category->name);
                 }
 
                 $plans = $plans->where('category_id', $category->id);
             }
-            return ReturnType::success("Get plans successfully", ['plans' => $plans->get()]);
+
+            $plans = $plans->get();
+
+            if ($withReport) {
+                $report = app(ReportService::class)->get($user, [
+                    'year' => $year, 'month' => $month, 'wallet' => $walletId, 'report_type' => 'categories'
+                ]);
+
+                $plans = $plans->map(function ($plan) use ($report) {
+
+                    if (isset($report['data']['reports'][$plan->category_id . ""])) {
+                        $plan = (object) array_merge($plan->toArray(), ['actual' => $report['data']['reports'][$plan->category_id . ""]['amount']]);
+                    } else {
+                        $plan = (object) array_merge($plan->toArray(), ['actual' => 0]);
+                    }
+                    return $plan;
+                });
+            }
+
+
+            return new SuccessfulData("Get plans successfully", ['plans' => $plans]);
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to get category plans!');
         }
     }
 
-    public function update(User $user, array $data, int $id): array
+    public function update(User $user, array $data, int $id): object
     {
         try {
             $plan = $this->getById($id);
 
             if (!$plan) {
-                return ReturnType::fail("Category plan not found!");
+                return new FailedData("Category plan not found!");
             }
 
             $planData = array_merge($data, ['user_id' => $user->id]);
@@ -95,29 +122,29 @@ class CategoryPlanService extends BaseService
             $updated = $plan->update($planData);
 
             if (!$updated) {
-                return ReturnType::fail('Something went wrong when update category plan');
+                return new FailedData('Something went wrong when update category plan');
             }
 
-            return ReturnType::success('Update plan successfully!');
+            return new SuccessfulData('Update plan successfully!');
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to update category plan!');
         }
     }
 
-    public function delete($id): array
+    public function delete(int $id): object
     {
         try {
             $deleted = $this->model::destroy($id);
             if (!$deleted) {
-                return ReturnType::fail('Delete fails or plan not found!');
+                return new FailedData('Delete fails or plan not found!');
             }
-            return ReturnType::success('Delete plan successfully!');
+            return new SuccessfulData('Delete plan successfully!');
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to delete category plan!');
         }
     }
 
-    public function checkExists($data)
+    public function checkExists(array $data): bool
     {
         return CategoryPlan::where([
             'user_id' => $data['user_id'],
@@ -125,5 +152,34 @@ class CategoryPlanService extends BaseService
             'year' => $data['year'],
             'category_id' => $data['category_id']
         ])->exists();
+    }
+
+    public function getYears(User $user, array $inputs): object
+    {
+        try {
+            $walletId = isset($inputs['wallet_id']) ? $inputs['wallet_id'] : null;
+
+            $query = $this->model::where('user_id', $user->id);
+
+            if ($walletId) {
+                $query->where('wallet_id', $walletId);
+            }
+
+            $minYear = $query->min('year');
+            $maxYear = $query->max('year');
+
+            if ($minYear == 0 && $maxYear == 0) {
+                $uniqueYears = [2023];
+            } else {
+                $yearRange = range($minYear, $maxYear);
+                $uniqueYears = array_unique($yearRange);
+
+                sort($uniqueYears);
+            }
+
+            return new SuccessfulData('Get years of plans successfully!', ['years' => $uniqueYears]);
+        } catch (Exception $e) {
+            return new FailedData('Failed to get years of category plans!');
+        }
     }
 }

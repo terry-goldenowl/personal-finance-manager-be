@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Categories;
 
-use App\Helpers\ReturnType;
+use App\Http\Helpers\ReturnType;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;

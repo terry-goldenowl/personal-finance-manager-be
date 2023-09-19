@@ -2,7 +2,9 @@
 
 namespace App\Http\Services;
 
-use App\Helpers\ReturnType;
+use App\Http\Helpers\FailedData;
+use App\Http\Helpers\ReturnType;
+use App\Http\Helpers\SuccessfulData;
 use App\Mail\EmailVerification;
 use App\Mail\PasswordReset;
 use App\Models\User;
@@ -37,7 +39,7 @@ class AuthService extends BaseService
         return $code;
     }
 
-    public function register(array $data): array
+    public function register(array $data): object
     {
         try {
             $data['password'] = Hash::make($data['password']);
@@ -45,16 +47,18 @@ class AuthService extends BaseService
             $newUser = $this->model::create($data);
 
             if (!$newUser) {
-                return ReturnType::fail('Register user fail!');
+                return new FailedData('Register user fail!');
             }
 
-            return ReturnType::success('Register user successfully!');
+            $newUser->assignRole('user');
+
+            return new SuccessfulData('Register user successfully!');
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to register user!');
         }
     }
 
-    public function sendVerificationCode(string $email): array
+    public function sendVerificationCode(string $email): object
     {
         try {
             $verificationCode = $this->_generateVerificationCode();
@@ -63,55 +67,57 @@ class AuthService extends BaseService
 
             Mail::to($email)->send(new EmailVerification($verificationCode));
 
-            return ReturnType::success('Email verification code was sent!');
+            return new SuccessfulData('Email verification code was sent!');
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to send email verification code!');
         }
     }
 
-    public function verify(string $email, string $verificationCode): array
+    public function verify(string $email, string $verificationCode): object
     {
         try {
             $isCorrectCode = $this->verificationCodeServices->checkExists($email, $verificationCode);
 
             if ($isCorrectCode) {
-                return ReturnType::success("Verification code is correct!");
+                return new SuccessfulData("Verification code is correct!");
             } else {
-                return ReturnType::fail("Verification code is incorrect!");
+                return new FailedData("Verification code is incorrect!");
             }
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to verify verification code!');
         }
     }
 
-    public function login($data): array
+    public function login(array $data): object
     {
         try {
             $user = $this->userServices->getUserByEmail($data['email']);
 
             if (!$user) {
-                return ReturnType::fail("User not found!");
+                return new FailedData("User not found!");
             }
 
             if (!Hash::check($data['password'], $user->password)) {
-                return ReturnType::fail('Password is not correct!');
+                return new FailedData('Password is not correct!');
             }
 
-            $token = $user->createToken(env('AUTH_TOKEN'))->plainTextToken;
+            $token = $user->createToken(config('constants.auth_token'))->plainTextToken;
+            $roles = $user->getRoleNames();
 
-            return ReturnType::success(
+            return new SuccessfulData(
                 'Login successfully!',
                 [
                     'user' => $user,
-                    'token' => $token
+                    'token' => $token,
+                    'roles' => $roles
                 ]
             );
         } catch (Exception $error) {
-            return ReturnType::fail('Something went wrong when login user!');
+            return new FailedData('Something went wrong when login user!');
         }
     }
 
-    public function resetPassword($data): array
+    public function resetPassword(array $data): object
     {
         try {
             $user = $this->userServices->getUserByEmail($data['email']);
@@ -121,44 +127,44 @@ class AuthService extends BaseService
                 $user->password = Hash::make($data['newPassword']);
                 $user->save();
 
-                return ReturnType::success("Password is updated!");
+                return new SuccessfulData("Password is updated!");
             } else {
-                return ReturnType::fail("Token is invalid!");
+                return new FailedData("Token is invalid!");
             }
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to reset password!');
         }
     }
 
-    public function forgetPassword(string $email): array
+    public function forgetPassword(string $email): object
     {
         try {
             if (!$this->userServices->checkExistsByEmail($email)) {
-                return ReturnType::fail('User with this email does not exist!');
+                return new FailedData('User with this email does not exist!');
             }
 
             $user = $this->userServices->getUserByEmail($email);
 
             $token = app(PasswordBroker::class)->createToken($user);
 
-            $resetLink = env('APP_FE_URL') . "/reset-password/" . $token;
+            $resetLink = config('constants.app_fe_url') . "/reset-password/" . $token;
 
             Mail::to($user)->send(new PasswordReset($resetLink));
 
-            return ReturnType::success('Password reset link was sent!');
+            return new SuccessfulData('Password reset link was sent!');
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Fail to send password reset link!');
         }
     }
 
-    public function logout(User $user): array
+    public function logout(User $user): object
     {
         try {
             $user->tokens()->delete();
 
-            return ReturnType::success('Logged out successfully!');
+            return new SuccessfulData('Logged out successfully!');
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to logout!');
         }
     }
 }

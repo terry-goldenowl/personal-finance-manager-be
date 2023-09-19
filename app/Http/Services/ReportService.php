@@ -2,20 +2,27 @@
 
 namespace App\Http\Services;
 
-use App\Helpers\ReturnType;
+use App\Exports\ReportExport;
+use App\Http\Helpers\FailedData;
+use App\Http\Helpers\ReturnType;
+use App\Http\Helpers\SuccessfulData;
+use App\Models\Transaction;
 use App\Models\User;
 use Exception;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportService
 {
-    public function get(User $user, array $inputs)
+    public function get(User $user, array $inputs): object
     {
         // Query by: date, month, year, category, wallet, report type (total/income/expense)
         try {
             $month = isset($inputs['month']) ? $inputs["month"] : null;
             $year = isset($inputs['year']) ? $inputs["year"] : null;
             $wallet = isset($inputs['wallet']) ? $inputs["wallet"] : null;
-            $transactionType = isset($inpusts['transaction_type']) ? $inputs["transaction_type"] : 'total';
+            $transactionType = isset($inputs['transaction_type']) ? $inputs["transaction_type"] : 'total';
             $reportType = isset($inputs['report_type']) ? $inputs["report_type"] : 'expenses-incomes';
 
             // FILTER TRANSACTIONS BY USERS, YEARS
@@ -50,12 +57,12 @@ class ReportService
                         }
                         // // REPORTS BY REPORT TYPE: TOTAL AMOUNT PER CATEGORY
                         elseif ($reportType == "categories") {
-                            $categoriesTotals[$category->name] = $category;
-                            if (!isset($categoriesTotals[$category->name][$category->type])) {
-                                $categoriesTotals[$category->name][$category->type] = 0;
+                            $categoriesTotals[$category->id] = $category;
+                            if (!isset($categoriesTotals[$category->id][$category->type])) {
+                                $categoriesTotals[$category->id][$category->type] = 0;
                             }
 
-                            $categoriesTotals[$category->name][$category->type] += $transaction->amount;
+                            $categoriesTotals[$category->id][$category->type] += $transaction->amount;
                         }
                     }
                 }
@@ -81,12 +88,12 @@ class ReportService
 
                             $transactionTotals[$day][$category->type] += $transaction->amount;
                         } elseif ($reportType == "categories") {
-                            $categoriesTotals[$category->name] = $category;
-                            if (!isset($categoriesTotals[$category->name][$category->type])) {
-                                $categoriesTotals[$category->name][$category->type] = 0;
+                            $categoriesTotals[$category->id] = $category;
+                            if (!isset($categoriesTotals[$category->id][$category->type])) {
+                                $categoriesTotals[$category->id][$category->type] = 0;
                             }
 
-                            $categoriesTotals[$category->name][$category->type] += $transaction->amount;
+                            $categoriesTotals[$category->id][$category->type] += $transaction->amount;
                         }
                     }
                 }
@@ -105,10 +112,11 @@ class ReportService
 
                     $transactionTotals = $filteredTotals;
                 } elseif ($reportType == "categories") {
+
                     foreach ($categoriesTotals as $item => $total) {
                         if (isset($total[$transactionType])) {
                             $filteredTotals[$item] = $total;
-                            $filteredTotals[$item]['amount'] = $total[$transactionType];
+                            $filteredTotals[$item]["amount"] = $total[$transactionType];
                         }
                     }
 
@@ -135,12 +143,72 @@ class ReportService
             }
 
             if ($reportType == "expenses-incomes") {
-                return ReturnType::success("", ['reports' => $transactionTotals]);
+                return new SuccessfulData("", ['reports' => $transactionTotals]);
             } elseif ($reportType == "categories") {
-                return ReturnType::success("", ['reports' => $categoriesTotals]);
+                return new SuccessfulData("", ['reports' => $categoriesTotals]);
             }
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to get reports!');
         }
+    }
+
+    public function getUserQuantityPerMonth(array $inputs): object
+    {
+        try {
+            $year = isset($inputs['year']) ? $inputs["year"] : null;
+
+            $userRegistrations = User::select(
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('COUNT(*) as count')
+            )
+                ->whereYear('created_at', $year)
+                ->groupBy(DB::raw('MONTH(created_at)'))
+                ->orderBy(DB::raw('MONTH(created_at)'))
+                ->get();
+
+            $result = [];
+            foreach ($userRegistrations as $registration) {
+                $result[date('F', mktime(0, 0, 0, $registration->month, 1))] = $registration->count;
+            }
+
+            return new SuccessfulData('Get user quantity per month successfully!', ['quantities' => $result]);
+        } catch (Exception $error) {
+            return new FailedData('Failed to get user quantity per month!');
+        }
+    }
+
+    public function getTransactionQuantityPerMonth(array $inputs): object
+    {
+        try {
+            $year = isset($inputs['year']) ? $inputs["year"] : null;
+
+            $transactionsCreated = Transaction::select(
+                DB::raw('MONTH(date) as month'),
+                DB::raw('COUNT(*) as count')
+            )
+                ->whereYear('date', $year)
+                ->groupBy(DB::raw('MONTH(date)'))
+                ->orderBy(DB::raw('MONTH(date)'))
+                ->get();
+
+            $result = [];
+            foreach ($transactionsCreated as $transaction) {
+                $result[date('F', mktime(0, 0, 0, $transaction->month, 1))] = $transaction->count;
+            }
+
+            return new SuccessfulData('Get transaction quantity per month successfully!', ['quantities' => $result]);
+        } catch (Exception $error) {
+            return new FailedData('Failed to get transaction quantity per month!');
+        }
+    }
+
+    public function export(User $user, array $inputs)
+    {
+        $month = isset($inputs['month']) ? $inputs['month'] : null;
+        $year = isset($inputs['year']) ? $inputs['year'] : null;
+
+        $response = Excel::download(new ReportExport($month, $year, $user->id), 'transactions.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+
+        return $response;
     }
 }

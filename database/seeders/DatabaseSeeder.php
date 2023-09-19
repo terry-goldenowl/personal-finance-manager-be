@@ -3,7 +3,15 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Category;
+use App\Models\CategoryPlan;
+use App\Models\MonthPlan;
+use App\Models\Transaction;
+use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,11 +20,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        Role::factory(2)->create();
+        User::factory(20)->create()->each(function ($user) {
+            $role = Role::inRandomOrder()->first();
+            $user->assignRole($role);
+        });
+        Wallet::factory(30)->create();
+        Category::factory(50)->create();
+        Transaction::factory(200)->create();
+        MonthPlan::factory(50)->create();
+        CategoryPlan::factory(200)->create();
     }
 }

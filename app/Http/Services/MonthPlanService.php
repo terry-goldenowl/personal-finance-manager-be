@@ -2,7 +2,9 @@
 
 namespace App\Http\Services;
 
-use App\Helpers\ReturnType;
+use App\Http\Helpers\FailedData;
+use App\Http\Helpers\ReturnType;
+use App\Http\Helpers\SuccessfulData;
 use App\Models\MonthPlan;
 use App\Models\User;
 use Exception;
@@ -17,37 +19,38 @@ class MonthPlanService extends BaseService
         $this->walletService = $walletService;
     }
 
-    public function create(User $user, array $data): array
+    public function create(User $user, array $data): object
     {
         try {
 
             if (!$this->walletService->checkExistsById($data['wallet_id']))
-                return ReturnType::fail('Wallet not found!');
+                return new FailedData('Wallet not found!');
 
             $planData = array_merge($data, ['user_id' => $user->id]);
 
             if ($this->checkExists($planData)) {
-                return ReturnType::fail('Plan is already exists!');
+                return new FailedData('Plan is already exists!');
             }
 
             $newPlan = $this->model::create($planData);
 
             if (!$newPlan) {
-                return ReturnType::fail('This plan has been set before by this user!');
+                return new FailedData('This plan has been set before by this user!');
             }
 
-            return ReturnType::success('Create month plan successfully!', ['plan' => $newPlan]);
+            return new SuccessfulData('Create month plan successfully!', ['plan' => $newPlan]);
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to create month plan!');
         }
     }
 
-    public function get(User $user, array $inputs)
+    public function get(User $user, array $inputs): object
     {
         try {
             $month = isset($inputs['month']) ? $inputs["month"] : null;
             $year = isset($inputs['year']) ? $inputs["year"] : null;
             $walletId = isset($inputs['wallet_id']) ? $inputs["wallet_id"] : null;
+            $withReport = isset($inputs['with_report']) ? $inputs["with_report"] : null;
 
             $plans = $user->month_plans()->where('year', $year)->where('wallet_id', $walletId);
 
@@ -55,18 +58,34 @@ class MonthPlanService extends BaseService
                 $plans->where('month', $month);
             }
 
-            return ReturnType::success("Get plans successfully", ['plans' => $plans->get()]);
+            $plans = $plans->get();
+
+            if ($withReport) {
+                $report = app(ReportService::class)->get($user, ['year' => $year, 'wallet_id' => $walletId]);
+
+                $plans = $plans->map(function ($plan) use ($report) {
+                    if (isset($report['data']['reports'][$plan['month']])) {
+                        $plan = (object) array_merge($plan->toArray(), ['actual' => $report['data']['reports'][$plan['month']]['expenses']]);
+                    } else {
+                        $plan = (object) array_merge($plan->toArray(), ['actual' => 0]);
+                    }
+
+                    return $plan;
+                });
+            }
+
+            return new SuccessfulData("Get plans successfully", ['plans' => $plans]);
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to get month plans!');
         }
     }
 
-    public function update(User $user, array $data, int $id): array
+    public function update(User $user, array $data, int $id): object
     {
         try {
             $plan = $this->getById($id);
             if (!$plan) {
-                return ReturnType::fail("Month plan not found!");
+                return new FailedData("Month plan not found!");
             }
 
             $planData = array_merge($data, ['user_id' => $user->id]);
@@ -74,34 +93,64 @@ class MonthPlanService extends BaseService
             $updated = $plan->update($planData);
 
             if (!$updated) {
-                return ReturnType::fail('Plan is not created!');
+                return new FailedData('Plan is not created!');
             }
 
-            return ReturnType::success('Update plan successfully!');
+            return new SuccessfulData('Update plan successfully!');
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to update month plan!');
         }
     }
 
-    public function delete($id): array
+    public function delete(int $id): object
     {
         try {
             $deleted = $this->model::destroy($id);
             if (!$deleted) {
-                return ReturnType::fail('Delete fails or plan not found!');
+                return new FailedData('Delete fails or plan not found!');
             }
-            return ReturnType::success('Delete plan successfully!');
+            return new SuccessfulData('Delete plan successfully!');
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to delete month plan!');
         }
     }
 
-    public function checkExists($data)
+    public function checkExists(array $data): bool
     {
         return $this->model::where([
             'user_id' => $data['user_id'],
             'month' => $data['month'],
             'year' => $data['year'],
         ])->exists();
+    }
+
+    public function getYears(User $user, array $inputs): object
+    {
+        try {
+
+            $walletId = isset($inputs['wallet_id']) ? $inputs['wallet_id'] : null;
+
+            $query = $this->model::where('user_id', $user->id);
+
+            if ($walletId) {
+                $query->where('wallet_id', $walletId);
+            }
+
+            $minYear = $query->min('year');
+            $maxYear = $query->max('year');
+
+            if ($minYear == 0 && $maxYear == 0) {
+                $uniqueYears = [2023];
+            } else {
+                $yearRange = range($minYear, $maxYear);
+                $uniqueYears = array_unique($yearRange);
+
+                sort($uniqueYears);
+            }
+
+            return new SuccessfulData('Get years of plans successfully!', ['years' => $uniqueYears]);
+        } catch (Exception $e) {
+            return new FailedData('Failed to get years of month plans!');
+        }
     }
 }

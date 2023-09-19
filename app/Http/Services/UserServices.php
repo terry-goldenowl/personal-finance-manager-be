@@ -2,8 +2,10 @@
 
 namespace App\Http\Services;
 
-use App\Helpers\ReturnType;
-use App\Helpers\StorageHelper;
+use App\Http\Helpers\FailedData;
+use App\Http\Helpers\ReturnType;
+use App\Http\Helpers\StorageHelper;
+use App\Http\Helpers\SuccessfulData;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Hash;
@@ -34,18 +36,41 @@ class UserServices extends BaseService
         return $user;
     }
 
-    public function getUsers(array $inputs)
+    public function getUsers(array $inputs): object
     {
         try {
-            $users = $this->model::get();
+            $users = $this->model::withCount('transactions')->get();
 
-            return ReturnType::success('Get users successfully!', ['users' => $users]);
+            $users = $users->filter(function ($user) {
+                return $user->hasRole('user');
+            })->values();
+
+            return new SuccessfulData('Get users successfully!', ['users' => $users]);
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Fail to get users!');
         }
     }
 
-    public function updateUser(User $user, array $data): array
+    public function countUsers()
+    {
+        try {
+            $count = $this->model::get()->filter(function ($user) {
+                return $user->hasRole('user');
+            })->values()->count();
+
+            $currentMonthCount = $this->model::whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)->get()
+                ->filter(function ($user) {
+                    return $user->hasRole('user');
+                })->values()->count();
+
+            return new SuccessfulData('Get users successfully!', ['count' => $count, 'currentMonthCount' => $currentMonthCount]);
+        } catch (Exception $error) {
+            return new FailedData('Failed to get users quantity!');
+        }
+    }
+
+    public function updateUser(User $user, array $data): object
     {
         try {
             $photo = isset($data['photo']) ? $data['photo'] : null;
@@ -64,9 +89,9 @@ class UserServices extends BaseService
 
             $user->update($data);
 
-            return ReturnType::success("Update user successfully", ['user' => $this->getById($user->id)]);
+            return new SuccessfulData("Update user successfully", ['user' => $this->getById($user->id)]);
         } catch (\Throwable $th) {
-            return ReturnType::fail('Fail to update user!');
+            return new FailedData('Failed to update user!');
         }
     }
 
@@ -75,41 +100,41 @@ class UserServices extends BaseService
         return $this->model::where('email', $email)->exists();
     }
 
-    public function updatePassword(int $userId, array $data): array
+    public function updatePassword(int $userId, array $data): object
     {
         try {
             $user = $this->getById($userId);
 
             if (!$user) {
-                return ReturnType::fail('User not found!');
+                return new FailedData('User not found!');
             }
 
             if (!Hash::check($data['password'], $user->password)) {
-                return ReturnType::fail(['password' => 'Password is not correct!']);
+                return new FailedData('Password is not correct!', ['password' => 'Password is not correct!']);
             }
 
-            $user->update(Hash::make($data['newPassword']));
+            $user->update(['password' => Hash::make($data['newPassword'])]);
 
-            return ReturnType::success('Update password successfully!');
+            return new SuccessfulData('Update password successfully!');
         } catch (\Throwable $th) {
-            return ReturnType::fail('Fail to update password!');
+            return new FailedData('Failed to update password!');
         }
     }
 
-    public function delete(int $id): array
+    public function delete(int $id): object
     {
         try {
             $user = $this->getById($id);
 
             if (!$user) {
-                return ReturnType::fail('User not found!');
+                return new FailedData('User not found!');
             }
 
             $this->model::find($id)->delete();
 
-            return ReturnType::success('Delete user successfully!');
+            return new SuccessfulData('Delete user successfully!');
         } catch (\Throwable $th) {
-            return ReturnType::fail('Fail to delete user account!');
+            return new FailedData('Failed to delete user account!');
         }
     }
 }
