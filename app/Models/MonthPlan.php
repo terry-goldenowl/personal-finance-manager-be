@@ -14,11 +14,17 @@ class MonthPlan extends Model
         'month',
         'year',
         'amount',
+        'wallet_id',
         'user_id'
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function wallet(): BelongsTo
+    {
+        return $this->belongsTo(Wallet::class);
     }
 }

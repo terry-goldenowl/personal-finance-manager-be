@@ -15,7 +15,8 @@ class CategoryPlan extends Model
         'year',
         'amount',
         'user_id',
-        'category_id'
+        'category_id',
+        'wallet_id'
     ];
 
     public function user(): BelongsTo
@@ -26,5 +27,10 @@ class CategoryPlan extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function wallet(): BelongsTo
+    {
+        return $this->belongsTo(Wallet::class);
     }
 }

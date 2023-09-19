@@ -29,7 +29,8 @@ class CreateCategoryPlanRequest extends FormRequest
             'month' => 'numeric|required',
             'year' => 'numeric|required',
             'amount' => 'numeric|required',
-            'category_id' => 'numeric|required'
+            'category_id' => 'numeric|required',
+            'wallet_id' => 'numeric|required'
         ];
     }
 
