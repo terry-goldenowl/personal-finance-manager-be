@@ -121,10 +121,15 @@ class WalletServices extends BaseService
     public function delete(int $id): object
     {
         try {
-            $deleted = $this->model::destroy($id);
-            if (!$deleted) {
-                return new FailedData('Delete fails or wallet not found!');
+            $wallet = $this->getById($id);
+
+            if ($wallet) {
+                app(TransactionServices::class)->deleteByWallet($wallet->id);
+                app(MonthPlanService::class)->deleteByWallet($wallet->id);
+                app(CategoryPlanService::class)->deleteByWallet($wallet->id);
             }
+
+            $this->model::destroy($id);
 
             return new SuccessfulData('Delete category successfully!');
         } catch (Exception $error) {

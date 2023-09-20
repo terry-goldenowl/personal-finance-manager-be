@@ -3,7 +3,6 @@
 namespace App\Http\Services;
 
 use App\Http\Helpers\FailedData;
-use App\Http\Helpers\ReturnType;
 use App\Http\Helpers\SuccessfulData;
 use App\Mail\EmailVerification;
 use App\Mail\PasswordReset;

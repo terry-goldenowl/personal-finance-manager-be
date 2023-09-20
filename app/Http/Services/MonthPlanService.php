@@ -34,10 +34,6 @@ class MonthPlanService extends BaseService
 
             $newPlan = $this->model::create($planData);
 
-            if (!$newPlan) {
-                return new FailedData('This plan has been set before by this user!');
-            }
-
             return new SuccessfulData('Create month plan successfully!', ['plan' => $newPlan]);
         } catch (Exception $error) {
             return new FailedData('Failed to create month plan!');
@@ -61,11 +57,11 @@ class MonthPlanService extends BaseService
             $plans = $plans->get();
 
             if ($withReport) {
-                $report = app(ReportService::class)->get($user, ['year' => $year, 'wallet_id' => $walletId]);
+                $report = app(ReportService::class)->get($user, ['year' => $year, 'wallet' => $walletId]);
 
                 $plans = $plans->map(function ($plan) use ($report) {
-                    if (isset($report['data']['reports'][$plan['month']])) {
-                        $plan = (object) array_merge($plan->toArray(), ['actual' => $report['data']['reports'][$plan['month']]['expenses']]);
+                    if (isset($report->getData()['reports'][$plan['month']])) {
+                        $plan = (object) array_merge($plan->toArray(), ['actual' => $report->getData()['reports'][$plan['month']]['expenses']]);
                     } else {
                         $plan = (object) array_merge($plan->toArray(), ['actual' => 0]);
                     }
@@ -115,12 +111,18 @@ class MonthPlanService extends BaseService
         }
     }
 
+    public function deleteByWallet(int $walletId): bool
+    {
+        return $this->model::where('wallet_id', $walletId)->delete();
+    }
+
     public function checkExists(array $data): bool
     {
         return $this->model::where([
             'user_id' => $data['user_id'],
             'month' => $data['month'],
             'year' => $data['year'],
+            'wallet_id' => $data['wallet_id']
         ])->exists();
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Services;
 use App\Http\Helpers\FailedData;
 use App\Http\Helpers\ReturnType;
 use App\Http\Helpers\SuccessfulData;
+use App\Models\Category;
 use App\Models\CategoryPlan;
 use App\Models\User;
 use Exception;
@@ -36,12 +37,14 @@ class CategoryPlanService extends BaseService
                 $category = $this->categoryService->getById($data['category_id']);
 
                 if ($category->default == 1) {
-                    $userCategory = $this->categoryService->getWithSameName($user->id, $category->id, $category->name);
+                    $userCategory = $this->categoryService->getWithSameNameOfUser($user->id, $category->id, $category->name);
 
                     if (!$userCategory) {
                         $category = $this->categoryService->createBasedOnDefault($user->id, $category);
+                        $data['category_id'] = $category->id;
+                    } else {
+                        $data['category_id'] = $userCategory->id;
                     }
-                    $data['category_id'] = $category->id;
                 }
             }
 
@@ -52,10 +55,6 @@ class CategoryPlanService extends BaseService
             }
 
             $newPlan = $this->model::create($planData);
-
-            if (!$newPlan) {
-                return new FailedData('This plan has been set before by this user!');
-            }
 
             return new SuccessfulData('Create category plan successfully!', ['plan' => $newPlan]);
         } catch (Exception $error) {
@@ -92,15 +91,14 @@ class CategoryPlanService extends BaseService
 
                 $plans = $plans->map(function ($plan) use ($report) {
 
-                    if (isset($report['data']['reports'][$plan->category_id . ""])) {
-                        $plan = (object) array_merge($plan->toArray(), ['actual' => $report['data']['reports'][$plan->category_id . ""]['amount']]);
+                    if (isset($report->getData()['reports'][$plan->category_id . ""])) {
+                        $plan = (object) array_merge($plan->toArray(), ['actual' => $report->getData()['reports'][$plan->category_id . ""]['amount']]);
                     } else {
                         $plan = (object) array_merge($plan->toArray(), ['actual' => 0]);
                     }
                     return $plan;
                 });
             }
-
 
             return new SuccessfulData("Get plans successfully", ['plans' => $plans]);
         } catch (Exception $error) {
@@ -144,13 +142,24 @@ class CategoryPlanService extends BaseService
         }
     }
 
+    public function deleteByCategoryid(int $categoryId): bool
+    {
+        return $this->model::where('category_id', $categoryId)->delete();
+    }
+
+    public function deleteByWalletId(int $walletId): bool
+    {
+        return $this->model::where('wallet_id', $walletId)->delete();
+    }
+
     public function checkExists(array $data): bool
     {
         return CategoryPlan::where([
             'user_id' => $data['user_id'],
             'month' => $data['month'],
             'year' => $data['year'],
-            'category_id' => $data['category_id']
+            'category_id' => $data['category_id'],
+            'wallet_id' => $data['wallet_id']
         ])->exists();
     }
 

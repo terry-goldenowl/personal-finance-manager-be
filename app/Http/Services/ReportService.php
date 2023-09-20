@@ -143,9 +143,9 @@ class ReportService
             }
 
             if ($reportType == "expenses-incomes") {
-                return new SuccessfulData("", ['reports' => $transactionTotals]);
+                return new SuccessfulData("Get transactions successfully!", ['reports' => $transactionTotals]);
             } elseif ($reportType == "categories") {
-                return new SuccessfulData("", ['reports' => $categoriesTotals]);
+                return new SuccessfulData("Get transactions successfully!", ['reports' => $categoriesTotals]);
             }
         } catch (Exception $error) {
             return new FailedData('Failed to get reports!');

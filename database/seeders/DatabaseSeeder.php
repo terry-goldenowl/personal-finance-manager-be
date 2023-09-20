@@ -20,14 +20,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::factory(2)->create();
-        User::factory(20)->create()->each(function ($user) {
+        Role::create(['name' => 'admin', 'guard_name' => 'api']);
+        Role::create(['name' => 'user', 'guard_name' => 'api']);
+
+        User::factory(15)->create()->each(function ($user) {
             $role = Role::inRandomOrder()->first();
             $user->assignRole($role);
         });
-        Wallet::factory(30)->create();
-        Category::factory(50)->create();
-        Transaction::factory(200)->create();
+        Wallet::factory(60)->create();
+        Category::factory(70)->create();
+        Transaction::factory(400)->create();
         MonthPlan::factory(50)->create();
         CategoryPlan::factory(200)->create();
     }

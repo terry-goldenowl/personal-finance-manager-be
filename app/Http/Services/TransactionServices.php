@@ -207,9 +207,14 @@ class TransactionServices extends BaseService
         return Transaction::find($id);
     }
 
-    public function deleleByCategory(int $categoryId)
+    public function deleleByCategory(int $categoryId): bool
     {
-        Transaction::where('category_id', $categoryId)->delete();
+        return Transaction::where('category_id', $categoryId)->delete();
+    }
+
+    public function deleteByWallet(int $walletId)
+    {
+        return Transaction::where('wallet_id', $walletId)->delete();
     }
 
     public function getYears(User $user, array $inputs): object

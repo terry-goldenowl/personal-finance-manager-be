@@ -21,7 +21,7 @@ class WalletFactory extends Factory
         $userIds = User::pluck('id')->toArray();
         $randomUserId = fake()->randomElement($userIds);
 
-        $isAlreadyHaveDefault = Wallet::where(['user_id' => $randomUserId, 'default' => 1])->exist();
+        $isAlreadyHaveDefault = Wallet::where(['user_id' => $randomUserId, 'default' => 1])->exists();
         $default = !$isAlreadyHaveDefault;
 
         return [

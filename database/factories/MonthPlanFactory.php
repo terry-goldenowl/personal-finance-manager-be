@@ -27,7 +27,7 @@ class MonthPlanFactory extends Factory
 
         $walletId = fake()->randomElement($walletIds);
         $month = fake()->numberBetween(1, 12);
-        $year = fake()->numberBetween(2020, 2030);
+        $year = fake()->numberBetween(2020, 2026);
 
         return [
             'month' => $month,

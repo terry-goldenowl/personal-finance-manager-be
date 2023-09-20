@@ -31,7 +31,7 @@ class CategoryPlanFactory extends Factory
         $categoryId = fake()->randomElement($categoryIds);
 
         $month = fake()->numberBetween(1, 12);
-        $year = fake()->numberBetween(2020, 2030);
+        $year = fake()->numberBetween(2020, 2026);
 
         return [
             'month' => $month,

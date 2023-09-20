@@ -119,12 +119,15 @@ class CategoryServices extends BaseService
                 })->values();
             }
 
-
             if ($withPlan && $month && $year) {
                 $categories = $categories->map(function ($category) use ($user, $month, $year, $walletId) {
                     $plan = app(CategoryPlanService::class)->get($user, ['month' => $month, 'year' => $year, 'category_id' => $category->id, 'wallet_id' => $walletId]);
 
-                    $category = (object) array_merge($category->toArray(), ['plan' => $plan['data']['plans']->first()]);
+                    if ($plan instanceof SuccessfulData) {
+                        $category = (object) array_merge($category->toArray(), ['plan' => $plan->getData()['plans']->first()]);
+                    } else {
+                        $category = (object) array_merge($category->toArray(), ['plan' => null]);
+                    }
 
                     return $category;
                 });
@@ -194,7 +197,7 @@ class CategoryServices extends BaseService
                 return new FailedData('Category not found!', ['error' => 'category']);
             }
 
-            if ($this->checkExists($category->user_id, $data['name'])) {
+            if ($category->default == 0 && $this->checkExists($category->user_id, $data['name'])) {
                 return new FailedData("This category name has been used!", ['name' => "This category name has been used!"]);
             }
 
@@ -232,6 +235,9 @@ class CategoryServices extends BaseService
                 return new FailedData('Category not found!');
             }
 
+            // Delete all plans belong to this cate
+            app(CategoryPlanService::class)->deleteByCategoryId($category->id);
+
             // Delete all transactions belongs to the category
             if ($category->default == 0) {
                 foreach ($category->transactions as $transaction) {
@@ -249,10 +255,6 @@ class CategoryServices extends BaseService
                 }
 
                 $deleted = $this->model::destroy($id);
-            }
-
-            if (!$deleted) {
-                return new FailedData('Delete category fails or category not found!');
             }
 
             return new SuccessfulData('Delete category successfully!');
@@ -299,11 +301,6 @@ class CategoryServices extends BaseService
     public function getWithSameNameOfUser(int $userId, int $id, string $name): ?Category
     {
         return Category::where(['user_id' => $userId, 'name' => $name])->where('id', '!=', $id)->first();
-    }
-
-    public function getWithSameName(int $id, string $name): ?Category
-    {
-        return Category::where('name', $name)->where('id', '!=', $id);
     }
 
     public function createCategory(array $data): ?Category

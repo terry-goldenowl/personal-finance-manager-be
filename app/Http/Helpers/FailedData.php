@@ -21,4 +21,9 @@ class FailedData extends BaseData
     {
         return ['message' => $this->message, 'error' => $this->error, 'status' => $this->status];
     }
+
+    public function getError(): array
+    {
+        return $this->error;
+    }
 }
