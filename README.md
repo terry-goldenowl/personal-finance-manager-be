@@ -69,6 +69,80 @@ This section should list any major frameworks/libraries used to bootstrap your p
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+### Project Folder Structure
+
+```
+.
+├───app
+│   ├───Console
+│   ├───Exceptions
+│   ├───Exports
+│   ├───Http
+│   │   ├───Controllers
+│   │   │   ├───Api
+│   │   │   │   └───v1
+│   │   │   └───Web
+│   │   ├───Helpers
+│   │   ├───Middleware
+│   │   ├───Requests
+│   │   │   ├───Categories
+│   │   │   ├───Plans
+│   │   │   ├───Transactions
+│   │   │   ├───Users
+│   │   │   └───Wallets
+│   │   └───Services
+│   ├───Mail
+│   ├───Models
+│   ├───Providers
+│   └───Services
+├───bootstrap
+│   └───cache
+├───config
+├───database
+│   ├───factories
+│   ├───migrations
+│   └───seeders
+├───public
+│   ├───images
+│   └───storage
+│       └───images
+│           ├───categories
+│           ├───sample
+│           ├───transactions
+│           ├───users
+│           └───wallets
+├───resources
+│   ├───css
+│   ├───js
+│   └───views
+│       ├───emails
+│       └───password
+├───routes
+├───storage
+│   ├───app
+│   │   └───public
+│   │       └───images
+│   │           ├───categories
+│   │           ├───sample
+│   │           ├───transactions
+│   │           ├───users
+│   │           └───wallets
+│   ├───framework
+│   │   ├───cache
+│   │   │   ├───data
+│   │   │   │   ├───02
+│   │   │   │   │   └───47
+│   │   │   │   └───...
+│   │   │   └───laravel-excel
+│   │   ├───sessions
+│   │   ├───testing
+│   │   └───views
+│   └───logs
+└───tests
+    ├───Feature
+    └───Unit
+```
+
 
 <!-- GETTING STARTED -->
 ## Getting Started
