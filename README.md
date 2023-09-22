@@ -4,7 +4,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/terry-goldenowl/personal-finance-manager-be">
-    <img src="public/images/logo-money-master.png" alt="Logo" width="180" height="180">
+    <img src="/public/images/logo-money-master.png" alt="Logo" width="180" height="180">
   </a>
 
   <h3 align="center">MONEY MASTER</h3>
