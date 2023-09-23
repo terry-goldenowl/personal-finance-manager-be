@@ -20,8 +20,8 @@ return new class extends Migration
             $table->unsignedBigInteger('wallet_id');
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('wallet_id')->references('id')->on('wallets');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('wallet_id')->references('id')->on('wallets')->onDelete('cascade');
         });
     }
 

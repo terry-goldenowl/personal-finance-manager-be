@@ -19,7 +19,7 @@ return new class extends Migration
             $table->boolean('default');
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -28,6 +28,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('month_plans');
+        Schema::dropIfExists('category_plans');
         Schema::dropIfExists('wallets');
     }
 };

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('default')->default(false);
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -29,6 +29,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('category_plans');
         Schema::dropIfExists('categories');
     }
 };

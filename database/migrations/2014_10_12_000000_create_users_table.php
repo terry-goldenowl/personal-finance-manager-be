@@ -19,8 +19,10 @@ return new class extends Migration
             $table->string('password');
             $table->string("verification_code")->nullable();
             $table->boolean("is_verified")->default(false);
+            $table->string('photo')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -29,6 +31,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('month_plans');
+        Schema::dropIfExists('category_plans');
+        Schema::dropIfExists('categories');
+        Schema::dropIfExists('wallets');
         Schema::dropIfExists('users');
     }
 };

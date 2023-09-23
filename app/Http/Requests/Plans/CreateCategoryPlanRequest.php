@@ -2,12 +2,8 @@
 
 namespace App\Http\Requests\Plans;
 
-use App\Helpers\ReturnType;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
-
 class CreateCategoryPlanRequest extends FormRequest
 {
     /**
@@ -32,13 +28,5 @@ class CreateCategoryPlanRequest extends FormRequest
             'category_id' => 'numeric|required',
             'wallet_id' => 'numeric|required'
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(ReturnType::response([
-            'status' => 'fail',
-            'error' => $validator->errors(),
-        ]));
     }
 }

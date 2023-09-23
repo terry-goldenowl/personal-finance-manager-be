@@ -2,13 +2,17 @@
 
 namespace App\Http\Services;
 
-use App\Helpers\ReturnType;
-use App\Helpers\StorageHelper;
+use App\Exports\ReportExport;
+use App\Http\Helpers\FailedData;
+use App\Http\Helpers\ReturnType;
+use App\Http\Helpers\StorageHelper;
+use App\Http\Helpers\SuccessfulData;
 use App\Models\Transaction;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TransactionServices extends BaseService
 {
@@ -22,14 +26,14 @@ class TransactionServices extends BaseService
         $this->walletService = $walletService;
     }
 
-    public function create(User $user, array $data): array
+    public function create(User $user, array $data): object
     {
         try {
             if (!$this->categoryService->checkExistsById($data['category_id']))
-                return ReturnType::fail('Category not found!');
+                return new FailedData('Category not found!');
 
             if (!$this->walletService->checkExistsById($data['wallet_id']))
-                return ReturnType::fail('Wallet not found!');
+                return new FailedData('Wallet not found!');
 
             $transactionData = array_merge($data, ['user_id' => $user->id]);
 
@@ -37,13 +41,7 @@ class TransactionServices extends BaseService
             $category = $this->categoryService->getById($data['category_id']);
 
             if ($category && $category->default == true) {
-                $newCategory = $this->categoryService->createCategory([
-                    'name' => $category->name,
-                    'type' => $category->type,
-                    'image' => $category->image,
-                    'user_id' => $user->id,
-                    'default' => false
-                ]);
+                $newCategory = $this->categoryService->createBasedOnDefault($user->id, $category);
             }
 
             if (isset($newCategory)) {
@@ -54,22 +52,18 @@ class TransactionServices extends BaseService
             $image = isset($data['image']) ? $data['image'] : null;
             if ($image) {
                 $imageUrl = StorageHelper::store($image, "/public/images/transactions");
-                $transactionData = array_merge($data, ['image' => $imageUrl]);
+                $transactionData = array_merge($transactionData, ['image' => $imageUrl]);
             }
 
             $newTransaction = $this->model::create($transactionData);
 
-            if (!$newTransaction) {
-                return ReturnType::fail('Create transaction failed!');
-            }
-
-            return ReturnType::success('Create transaction successfully!', ['transaction' => $newTransaction]);
+            return new SuccessfulData('Create transaction successfully!', ['transaction' => $newTransaction]);
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to create transaction!');
         }
     }
 
-    public function get(User $user, array $inputs): array
+    public function get(User $user, array $inputs): object
     {
         try {
             $day = isset($inputs['day']) ? $inputs["day"] : null;
@@ -120,28 +114,41 @@ class TransactionServices extends BaseService
 
             $transactions = $query->orderBy('date', 'desc')->with('category')->get();
 
-            return ReturnType::success("", ['transactions' => $transactions]);
+            return new SuccessfulData("", ['transactions' => $transactions]);
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to get transactions!');
         }
     }
 
-    public function update(User $user, array $data, int $id): array
+    public function count()
+    {
+        try {
+            $count = $this->model::get()->count();
+            $currentMonthCount = $this->model::whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)->get()->count();
+
+            return new SuccessfulData('Get users successfully!', ['count' => $count, 'currentMonthCount' => $currentMonthCount]);
+        } catch (Exception $error) {
+            return new FailedData('Failed to get transactions quantity');
+        }
+    }
+
+    public function update(User $user, array $data, int $id): object
     {
         try {
             $transaction = $this->getById($id);
             if (!$transaction) {
-                return ReturnType::fail('Transaction not found!');
+                return new FailedData('Transaction not found!');
             }
 
             if (isset($data['category_id'])) {
                 if (!$this->categoryService->checkExistsById($data['category_id']))
-                    return ReturnType::fail('Category not found!');
+                    return new FailedData('Category not found!');
             }
 
             if (isset($data['wallet_id'])) {
                 if (!$this->walletService->checkExistsById($data['wallet_id']))
-                    return ReturnType::fail('Wallet not found!');
+                    return new FailedData('Wallet not found!');
             }
 
             $image = isset($data['image']) ? $data['image'] : null;
@@ -162,12 +169,12 @@ class TransactionServices extends BaseService
             $updated = $transaction->update($transactionData);
 
             if (!$updated) {
-                return ReturnType::fail('Update transaction failed!');
+                return new FailedData('Update transaction failed!');
             }
 
-            return ReturnType::success('Update transaction successfully!', $data);
+            return new SuccessfulData('Update transaction successfully!', $data);
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to update transation!');
         }
     }
 
@@ -176,7 +183,7 @@ class TransactionServices extends BaseService
         try {
             $transaction = $this->getById($id);
             if (!$transaction) {
-                return ReturnType::fail('Transaction not found!');
+                return new FailedData('Transaction not found!');
             }
 
             if ($transaction->image) {
@@ -186,12 +193,12 @@ class TransactionServices extends BaseService
 
             $deleted = $this->model::destroy($id);
             if (!$deleted) {
-                return ReturnType::fail('Can not delete transaction!');
+                return new FailedData('Can not delete transaction!');
             }
 
-            return ReturnType::success('Delete transaction successfully!');
+            return new SuccessfulData('Delete transaction successfully!');
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to delete transaction!');
         }
     }
 
@@ -200,8 +207,39 @@ class TransactionServices extends BaseService
         return Transaction::find($id);
     }
 
-    public function deleleByCategory(int $categoryId)
+    public function deleleByCategory(int $categoryId): bool
     {
-        Transaction::where('category_id', $categoryId)->delete();
+        return Transaction::where('category_id', $categoryId)->delete();
+    }
+
+    public function deleteByWallet(int $walletId)
+    {
+        return Transaction::where('wallet_id', $walletId)->delete();
+    }
+
+    public function getYears(User $user, array $inputs): object
+    {
+        try {
+            $walletId = isset($inputs['wallet_id']) ? $inputs['wallet_id'] : null;
+
+            $query = $this->model::where('user_id', $user->id);
+
+            if ($walletId) {
+                $query->where('wallet_id', $walletId);
+            }
+
+            $years = Transaction::selectRaw('YEAR(date) as year')
+                ->distinct()
+                ->orderBy('year')
+                ->pluck('year');
+
+            if ($years->count() === 0) {
+                $years = [2023];
+            }
+
+            return new SuccessfulData('Get years of plans successfully!', ['years' => $years]);
+        } catch (Exception $error) {
+            return new FailedData('Failed to get transactions years!');
+        }
     }
 }

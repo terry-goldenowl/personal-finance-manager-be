@@ -2,8 +2,10 @@
 
 namespace App\Http\Services;
 
-use App\Helpers\ReturnType;
-use App\Helpers\StorageHelper;
+use App\Http\Helpers\FailedData;
+use App\Http\Helpers\ReturnType;
+use App\Http\Helpers\StorageHelper;
+use App\Http\Helpers\SuccessfulData;
 use App\Models\User;
 use App\Models\Wallet;
 use Exception;
@@ -16,21 +18,17 @@ class WalletServices extends BaseService
         parent::__construct(Wallet::class);
     }
 
-    public function create(User $user, array $data): array
+    public function create(User $user, array $data): object
     {
         try {
-            if (!$this->checkExists($user->id, $data['name'])) {
-                return ReturnType::fail(['name' => "This category name has been used!"]);
+            if ($this->checkExistsByName($user->id, $data['name'])) {
+                return new FailedData("This wallet name has been used!", ['name' => "This wallet name has been used!"]);
             }
 
             $image = isset($data['image']) ? $data['image'] : null;
             $imageUrl = StorageHelper::store($image, "/public/images/wallets");
 
             $walletData = array_merge($data, ['user_id' => $user->id, 'image' => $imageUrl]);
-
-            if ($this->checkExistsByName($walletData['user_id'], $walletData['name'])) {
-                return ReturnType::fail(['name' => 'Wallet with this name already exists!']);
-            }
 
             $newWallet = Wallet::create($walletData);
 
@@ -43,15 +41,13 @@ class WalletServices extends BaseService
                 }
             }
 
-            return ReturnType::success('Create wallet successfully!', ['wallet' => $newWallet]);
+            return new SuccessfulData('Create wallet successfully!', ['wallet' => $newWallet]);
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData($error);
         }
-
-        return $newWallet;
     }
 
-    public function get(User $user)
+    public function get(User $user): object
     {
         try {
             $wallets = $user->wallets()->get()->map(function ($wallet) use ($user) {
@@ -62,9 +58,9 @@ class WalletServices extends BaseService
                 return $wallet;
             });
 
-            return ReturnType::success("Get wallets successfully", ['wallets' => $wallets]);
+            return new SuccessfulData("Get wallets successfully", ['wallets' => $wallets]);
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Something went wrong when fetching wallets!', ['error' => $error]);
         }
     }
 
@@ -87,13 +83,13 @@ class WalletServices extends BaseService
         return $balance;
     }
 
-    public function update($data, int $id): array
+    public function update(array $data, int $id): object
     {
         try {
 
             $wallet = $this->getById($id);
             if (!$wallet) {
-                return ReturnType::fail('Wallet not found!');
+                return new FailedData('Wallet not found!');
             }
 
             $image = isset($data['image']) ? $data['image'] : null;
@@ -110,47 +106,48 @@ class WalletServices extends BaseService
 
             $data = $image ? array_merge($data, ['image' => $imageUrl]) : $data;
 
-            $updated = $wallet->update($data);
+            $wallet->update($data);
 
             if ($data['default'] == true) {
-                $this->updateDefaultExcept($data['user_id'], $data['wallet_id'], false);
+                $this->updateDefaultExcept($wallet->user_id, $id, false);
             }
 
-            if (!!!$updated) {
-                return ReturnType::fail('Update fails or wallet not found!');
-            }
-
-            return ReturnType::success('Update wallet successfully!');
+            return new SuccessfulData('Update wallet successfully!');
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to update wallet!', ['error' => $error]);
         }
     }
 
-    public function delete($id): array
+    public function delete(int $id): object
     {
         try {
-            $deleted = $this->model::destroy($id);
-            if (!$deleted) {
-                return ReturnType::fail('Delete fails or wallet not found!');
+            $wallet = $this->getById($id);
+
+            if ($wallet) {
+                app(TransactionServices::class)->deleteByWallet($wallet->id);
+                app(MonthPlanService::class)->deleteByWallet($wallet->id);
+                app(CategoryPlanService::class)->deleteByWalletId($wallet->id);
             }
 
-            return ReturnType::success('Delete category successfully!');
+            $this->model::destroy($id);
+
+            return new SuccessfulData('Delete category successfully!');
         } catch (Exception $error) {
-            return ReturnType::fail($error);
+            return new FailedData('Failed to delete category!', ['error' => $error]);
         }
     }
 
-    public function checkExistsByName(int $userId, string $name)
+    public function checkExistsByName(int $userId, string $name): bool
     {
         return Wallet::where(['user_id' => $userId, 'name' => $name])->exists();
     }
 
-    public function countByUser(int $userId)
+    public function countByUser(int $userId): int
     {
         return Wallet::where('user_id', $userId)->count();
     }
 
-    public function updateDefaultExcept(int $userId, int $walletIdExcept, bool $default)
+    public function updateDefaultExcept(int $userId, int $walletIdExcept, bool $default): bool
     {
         return Wallet::where('user_id', $userId)->where('id', '!=', $walletIdExcept)->update(['default' => $default]);
     }
@@ -158,14 +155,6 @@ class WalletServices extends BaseService
     public function checkExistsById(int $id): bool
     {
         return Wallet::where('id', $id)->exists();
-    }
-
-    public function checkExists($userId, $name): bool
-    {
-        if (Wallet::where(['user_id' => $userId, 'name' => $name])->exists()) {
-            return false;
-        }
-        return true;
     }
 
     public function getById(int $id): ?Wallet

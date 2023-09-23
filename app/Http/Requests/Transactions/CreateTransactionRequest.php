@@ -2,13 +2,10 @@
 
 namespace App\Http\Requests\Transactions;
 
-use App\Helpers\ReturnType;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\RequestRoot;
 use Illuminate\Support\Facades\Auth;
 
-class CreateTransactionRequest extends FormRequest
+class CreateTransactionRequest extends RequestRoot
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -34,13 +31,5 @@ class CreateTransactionRequest extends FormRequest
             'description' => 'nullable|string',
             'image' => 'nullable|file|mimes:jpeg,png,gif|max:2048'
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(ReturnType::response([
-            'status' => 'fail',
-            'error' => $validator->errors(),
-        ]));
     }
 }

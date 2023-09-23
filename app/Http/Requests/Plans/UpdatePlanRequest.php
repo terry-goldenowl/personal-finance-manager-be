@@ -2,13 +2,10 @@
 
 namespace App\Http\Requests\Plans;
 
-use App\Helpers\ReturnType;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\RequestRoot;
 use Illuminate\Support\Facades\Auth;
 
-class UpdatePlanRequest extends FormRequest
+class UpdatePlanRequest extends RequestRoot
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,13 +25,5 @@ class UpdatePlanRequest extends FormRequest
         return [
             'amount' => 'numeric|required',
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(ReturnType::response([
-            'status' => 'fail',
-            'error' => $validator->errors(),
-        ]));
     }
 }

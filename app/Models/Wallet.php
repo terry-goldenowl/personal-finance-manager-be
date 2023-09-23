@@ -23,11 +23,6 @@ class Wallet extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function wallet_month(): HasMany
-    {
-        return $this->hasMany(WalletMonth::class);
-    }
-
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
