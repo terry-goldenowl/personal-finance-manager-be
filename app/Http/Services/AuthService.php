@@ -64,7 +64,7 @@ class AuthService extends BaseService
 
             $this->verificationCodeServices->createOrUpdate($email, $verificationCode);
 
-            Mail::to($email)->send(new EmailVerification($verificationCode));
+            Mail::to($email)->queue(new EmailVerification($verificationCode));
 
             return new SuccessfulData('Email verification code was sent!');
         } catch (Exception $error) {
@@ -97,7 +97,7 @@ class AuthService extends BaseService
             }
 
             if (!Hash::check($data['password'], $user->password)) {
-                return new FailedData('Password is not correct!');
+                return new FailedData('Password is not correct!', ['password' => 'Password is not correct!']);
             }
 
             $token = $user->createToken(config('constants.auth_token'))->plainTextToken;
@@ -148,7 +148,7 @@ class AuthService extends BaseService
 
             $resetLink = config('constants.app_fe_url') . "/reset-password/" . $token;
 
-            Mail::to($user)->send(new PasswordReset($resetLink));
+            Mail::to($user)->queue(new PasswordReset($resetLink));
 
             return new SuccessfulData('Password reset link was sent!');
         } catch (Exception $error) {

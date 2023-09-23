@@ -24,10 +24,14 @@ class WalletFactory extends Factory
         $isAlreadyHaveDefault = Wallet::where(['user_id' => $randomUserId, 'default' => 1])->exists();
         $default = !$isAlreadyHaveDefault;
 
+        do {
+            $name = fake()->word;
+        } while (Wallet::where(['user_id' => $randomUserId, 'name' => 'name'])->exists());
+
         return [
-            'name' => fake()->word,
+            'name' => $name,
             'user_id' => $randomUserId,
-            'image' => '/storage/images/sample/wUQ8spinlAuYmkpLTYI3cp5qAvP3aoCLu0aA3rAr.jpg',
+            'image' => '/storage/images/sample/sample-wallet.jpg',
             'default' => $default,
         ];
     }

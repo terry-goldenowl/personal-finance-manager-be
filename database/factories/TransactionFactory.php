@@ -20,7 +20,7 @@ class TransactionFactory extends Factory
     public function definition(): array
     {
         do {
-            $userIds = User::take(10)->pluck('id')->toArray();
+            $userIds = User::all()->pluck('id')->toArray();
             $userId = fake()->randomElement($userIds);
 
             $walletIds = Wallet::where('user_id', $userId)->pluck('id')->toArray();
@@ -51,7 +51,7 @@ class TransactionFactory extends Factory
 
         return [
             'title' => fake()->words(fake()->numberBetween(4, 10), true),
-            'image' => fake()->randomElement(['/storage/images/sample/wUQ8spinlAuYmkpLTYI3cp5qAvP3aoCLu0aA3rAr.jpg', '']),
+            'image' => fake()->randomElement(['/storage/images/sample/sample-bill.jpg', '']),
             'date' => $date,
             'description' => fake()->optional()->sentence,
             'user_id' => $userId,

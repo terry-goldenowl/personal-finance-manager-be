@@ -2,13 +2,10 @@
 
 namespace App\Http\Requests\Wallets;
 
-use App\Http\Helpers\ReturnType;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\RequestRoot;
 use Illuminate\Support\Facades\Auth;
 
-class UpdateWalletRequest extends FormRequest
+class UpdateWalletRequest extends RequestRoot
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -30,13 +27,5 @@ class UpdateWalletRequest extends FormRequest
             'image' => 'nullable|file|mimes:jpeg,png,gif|max:2048',
             'default' => 'boolean|nullable'
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(ReturnType::response([
-            'status' => 'fail',
-            'error' => $validator->errors(),
-        ]));
     }
 }

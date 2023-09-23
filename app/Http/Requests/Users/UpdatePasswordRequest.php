@@ -2,14 +2,10 @@
 
 namespace App\Http\Requests\Users;
 
-use App\Http\Helpers\ReturnType;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\RequestRoot;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules;
 
-class UpdatePasswordRequest extends FormRequest
+class UpdatePasswordRequest extends RequestRoot
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -30,13 +26,5 @@ class UpdatePasswordRequest extends FormRequest
             'password' => 'required|string',
             'newPassword' => 'required|string|confirmed|min:8',
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(ReturnType::response([
-            'status' => 'fail',
-            'error' => $validator->errors(),
-        ]));
     }
 }

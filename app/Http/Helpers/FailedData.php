@@ -14,7 +14,7 @@ class FailedData extends BaseData
 
         if (!$error) {
             $this->error = ['error' => $message];
-        } else $this->error = [];
+        } else $this->error = $error;
     }
 
     public function get(): array

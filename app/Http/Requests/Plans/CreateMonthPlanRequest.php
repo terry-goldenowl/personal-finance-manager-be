@@ -2,13 +2,10 @@
 
 namespace App\Http\Requests\Plans;
 
-use App\Http\Helpers\ReturnType;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\RequestRoot;
 use Illuminate\Support\Facades\Auth;
 
-class CreateMonthPlanRequest extends FormRequest
+class CreateMonthPlanRequest extends RequestRoot
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -31,13 +28,5 @@ class CreateMonthPlanRequest extends FormRequest
             'amount' => 'numeric|required',
             'wallet_id' => 'numeric|required'
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(ReturnType::response([
-            'status' => 'fail',
-            'error' => $validator->errors(),
-        ]));
     }
 }

@@ -2,14 +2,10 @@
 
 namespace App\Http\Requests\Users;
 
-use App\Http\Helpers\ReturnType;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\RequestRoot;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules;
 
-class UpdateUserRequest extends FormRequest
+class UpdateUserRequest extends RequestRoot
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -31,13 +27,5 @@ class UpdateUserRequest extends FormRequest
             'name' => 'nullable|string|max:50',
             'email' => 'nullable|string|email'
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(ReturnType::response([
-            'status' => 'fail',
-            'error' => $validator->errors(),
-        ]));
     }
 }

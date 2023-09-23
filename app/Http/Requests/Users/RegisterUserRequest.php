@@ -2,14 +2,11 @@
 
 namespace App\Http\Requests\Users;
 
-use App\Http\Helpers\ReturnType;
+use App\Http\Requests\RequestRoot;
 use App\Models\User;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rules;
 
-class RegisterUserRequest extends FormRequest
+class RegisterUserRequest extends RequestRoot
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -31,13 +28,5 @@ class RegisterUserRequest extends FormRequest
             "email" => ['required', 'string', 'email', 'unique:' . User::class],
             "password" => ['required', 'confirmed', 'min:8', 'max:30', Rules\Password::defaults()]
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(ReturnType::response([
-            'status' => 'fail',
-            'error' => $validator->errors(),
-        ]));
     }
 }

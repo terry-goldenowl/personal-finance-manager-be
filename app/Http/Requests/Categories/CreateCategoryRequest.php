@@ -2,13 +2,10 @@
 
 namespace App\Http\Requests\Categories;
 
-use App\Http\Helpers\ReturnType;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\RequestRoot;
 
-class CreateCategoryRequest extends FormRequest
+class CreateCategoryRequest extends RequestRoot
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -30,13 +27,5 @@ class CreateCategoryRequest extends FormRequest
             'image' => 'required|file|mimes:jpeg,png,gif|max:2048',
             'type' => 'string|required',
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(ReturnType::response([
-            'status' => 'fail',
-            'error' => $validator->errors(),
-        ]));
     }
 }

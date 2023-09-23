@@ -126,7 +126,7 @@ class WalletServices extends BaseService
             if ($wallet) {
                 app(TransactionServices::class)->deleteByWallet($wallet->id);
                 app(MonthPlanService::class)->deleteByWallet($wallet->id);
-                app(CategoryPlanService::class)->deleteByWallet($wallet->id);
+                app(CategoryPlanService::class)->deleteByWalletId($wallet->id);
             }
 
             $this->model::destroy($id);

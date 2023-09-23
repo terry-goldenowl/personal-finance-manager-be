@@ -2,13 +2,10 @@
 
 namespace App\Http\Requests\Users;
 
-use App\Http\Helpers\ReturnType;
+use App\Http\Requests\RequestRoot;
 use App\Models\User;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
-class SendVerficationCodeRequest extends FormRequest
+class SendVerficationCodeRequest extends RequestRoot
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,13 +25,5 @@ class SendVerficationCodeRequest extends FormRequest
         return [
             "email" => ['required', 'string', 'email', 'unique:' . User::class],
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(ReturnType::response([
-            'status' => 'fail',
-            'error' => $validator->errors(),
-        ]));
     }
 }
