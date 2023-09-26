@@ -26,7 +26,7 @@ class AuthService extends BaseService
         $this->userServices = $userServices;
     }
 
-    private function _generateVerificationCode(int $length = 6): string
+    public function _generateVerificationCode(int $length = 6): string
     {
         $characters = '0123456789';
         $code = '';

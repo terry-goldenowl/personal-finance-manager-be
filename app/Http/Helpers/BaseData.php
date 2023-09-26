@@ -5,8 +5,8 @@ namespace App\Http\Helpers;
 abstract class BaseData
 {
     public function __construct(
-        protected string $message,
-        protected string $status
+        public string $message,
+        public string $status
     ) {
     }
 
