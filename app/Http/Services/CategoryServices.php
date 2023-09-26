@@ -119,7 +119,7 @@ class CategoryServices extends BaseService
                 })->values();
             }
 
-            if ($withPlan && $month && $year) {
+            if ($withPlan && $month && $year && $walletId) {
                 $categories = $categories->map(function ($category) use ($user, $month, $year, $walletId) {
                     $plan = app(CategoryPlanService::class)->get($user, ['month' => $month, 'year' => $year, 'category_id' => $category->id, 'wallet_id' => $walletId]);
 

@@ -4,7 +4,7 @@ namespace App\Http\Helpers;
 
 class FailedData extends BaseData
 {
-    private array $error;
+    public array $error;
 
     public function __construct(
         string $message,

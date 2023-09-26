@@ -4,7 +4,7 @@ namespace App\Http\Helpers;
 
 class SuccessfulData extends BaseData
 {
-    private array $data;
+    public array $data;
 
     public function __construct(
         string $message,

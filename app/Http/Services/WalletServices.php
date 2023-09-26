@@ -64,7 +64,7 @@ class WalletServices extends BaseService
         }
     }
 
-    private function getBalance(User $user, int $walletId)
+    public function getBalance(User $user, int $walletId)
     {
         $balance = $user->wallets()->where('id', $walletId)
             ->with('transactions.category')
@@ -122,6 +122,10 @@ class WalletServices extends BaseService
     {
         try {
             $wallet = $this->getById($id);
+
+            if (!$wallet) {
+                return new FailedData('Wallet not found!');
+            }
 
             if ($wallet) {
                 app(TransactionServices::class)->deleteByWallet($wallet->id);
