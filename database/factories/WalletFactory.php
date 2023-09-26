@@ -32,7 +32,7 @@ class WalletFactory extends Factory
         return [
             'name' => $name,
             'user_id' => $randomUserId,
-            'image' => env('APP_URL') . ':'. env('APP_PORT') . '/images/samples/wallets/wallet-' . random_int(1, 4) . ".jpg",
+            'image' => env('APP_URL') . '/images/samples/wallets/wallet-' . random_int(1, 4) . ".jpg",
             'default' => $default,
         ];
     }

@@ -19,7 +19,7 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         $name = fake()->word;
-        $image =  env('APP_URL') . ':' .  env('APP_PORT') . '/images/samples/categories/category-' . random_int(1, 6) . '.jpg';
+        $image =  env('APP_URL') . '/images/samples/categories/category-' . random_int(1, 6) . '.jpg';
         $default = fake()->randomElement([0, 1]);
         $type = fake()->randomElement(['expenses', 'incomes']);
 

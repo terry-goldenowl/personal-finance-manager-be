@@ -52,7 +52,7 @@ class TransactionFactory extends Factory
 
         return [
             'title' => fake()->words(fake()->numberBetween(4, 10), true),
-            'image' => fake()->randomElement([env('APP_URL'). ':' .  env('APP_PORT') . '/images/samples/transactions/transaction-' . random_int(1, 1). '.jpg', '']),
+            'image' => fake()->randomElement([env('APP_URL') . '/images/samples/transactions/transaction-' . random_int(1, 1). '.jpg', '']),
             'date' => $date,
             'description' => fake()->optional()->sentence,
             'user_id' => $userId,
