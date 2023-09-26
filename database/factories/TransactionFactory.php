@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\URL;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Transaction>
@@ -51,7 +52,7 @@ class TransactionFactory extends Factory
 
         return [
             'title' => fake()->words(fake()->numberBetween(4, 10), true),
-            'image' => fake()->randomElement(['/storage/images/sample/sample-bill.jpg', '']),
+            'image' => fake()->randomElement([env('APP_URL'). ':' .  env('APP_PORT') . '/images/samples/transactions/transaction-' . random_int(1, 1). '.jpg', '']),
             'date' => $date,
             'description' => fake()->optional()->sentence,
             'user_id' => $userId,

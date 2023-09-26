@@ -120,7 +120,14 @@ class AuthService extends BaseService
     {
         try {
             $user = $this->userServices->getUserByEmail($data['email']);
-            $tokenExists = app(PasswordBroker::class)->tokenExists($user, $data['token']);
+
+            if (!$user) {
+                return new FailedData("User with this email does not exists!");
+            }
+
+            $tokenExists = app(PasswordBroker::class)->tokenExists($user, Hash::make($data['token']));
+
+            dd($tokenExists);
 
             if ($tokenExists) {
                 $user->password = Hash::make($data['newPassword']);
