@@ -127,8 +127,6 @@ class AuthService extends BaseService
 
             $tokenExists = app(PasswordBroker::class)->tokenExists($user, Hash::make($data['token']));
 
-            dd($tokenExists);
-
             if ($tokenExists) {
                 $user->password = Hash::make($data['newPassword']);
                 $user->save();

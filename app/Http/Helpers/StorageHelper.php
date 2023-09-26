@@ -17,7 +17,7 @@ class StorageHelper
 
             $path = Storage::putFile($folderPath, $image);
 
-            $imageUrl = url(Storage::url($path));
+            $imageUrl = env('APP_URL') . (Storage::url($path));
         }
 
         return $imageUrl;
