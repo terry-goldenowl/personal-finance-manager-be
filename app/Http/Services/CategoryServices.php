@@ -197,10 +197,6 @@ class CategoryServices extends BaseService
                 return new FailedData('Category not found!', ['error' => 'category']);
             }
 
-            if ($category->default == 0 && $this->checkExists($category->user_id, $data['name'])) {
-                return new FailedData("This category name has been used!", ['name' => "This category name has been used!"]);
-            }
-
             $image = isset($data['image']) ? $data['image'] : null;
             if ($image) {
                 // DELETE OLD IMAGE

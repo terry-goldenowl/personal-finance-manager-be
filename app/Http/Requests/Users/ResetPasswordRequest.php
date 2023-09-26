@@ -13,4 +13,13 @@ class ResetPasswordRequest extends RequestRoot
     {
         return true;
     }
+
+    public function rules(): array
+    {
+        return [
+            'newPassword' => 'required|string|confirmed|min:8',
+            'token' => 'required|string',
+            'email' => 'required|email'
+        ];
+    }
 }
