@@ -185,6 +185,10 @@ Here's how you can install the repository and run project locally:
    ```sh
    php artisan serve
    ```
+6. Make the jobs queue works
+   ```sh
+   php artisan queue:work
+   ```
 You can now access the server at http://localhost:8000
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
