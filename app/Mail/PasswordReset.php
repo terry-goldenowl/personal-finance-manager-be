@@ -39,7 +39,7 @@ class PasswordReset extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'password.password-reset',
+            markdown: 'password.password-reset',
         );
     }
 

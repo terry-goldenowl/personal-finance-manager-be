@@ -39,7 +39,7 @@ class EmailVerification extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.email-verification',
+            markdown: 'emails.email-verification',
         );
     }
 
