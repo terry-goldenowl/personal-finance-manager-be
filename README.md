@@ -143,6 +143,9 @@ This section should list any major frameworks/libraries used to bootstrap your p
     └───Unit
 ```
 
+## Architecture Diagram
+![image](https://github.com/terry-goldenowl/personal-finance-manager-be/assets/138744655/9f09766f-bcca-4fe7-acf0-5297010f8a80)
+
 
 <!-- GETTING STARTED -->
 ## Getting Started
