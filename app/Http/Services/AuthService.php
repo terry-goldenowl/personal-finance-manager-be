@@ -127,6 +127,8 @@ class AuthService extends BaseService
 
             $tokenExists = app(PasswordBroker::class)->tokenExists($user, Hash::make($data['token']));
 
+            dd(Hash::make($data['token']));
+
             if ($tokenExists) {
                 $user->password = Hash::make($data['newPassword']);
                 $user->save();
@@ -149,6 +151,7 @@ class AuthService extends BaseService
 
             $user = $this->userServices->getUserByEmail($email);
 
+            app(PasswordBroker::class)->deleteToken($user);
             $token = app(PasswordBroker::class)->createToken($user);
 
             $resetLink = config('constants.app_fe_url') . "/reset-password/" . $token;
