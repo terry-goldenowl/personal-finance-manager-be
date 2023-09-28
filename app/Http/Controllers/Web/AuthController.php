@@ -2,23 +2,19 @@
 
 namespace App\Http\Controllers\Web;
 
-
-use Exception;
-
-use Illuminate\Http\Request;
-
 use App\Http\Controllers\Controller;
 use App\Http\Helpers\AuthHelper;
+use Exception;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
     private AuthHelper $authHelper;
 
-    function __construct(AuthHelper $authHelper)
+    public function __construct(AuthHelper $authHelper)
     {
         $this->authHelper = $authHelper;
     }
-
 
     public function register(Request $request)
     {

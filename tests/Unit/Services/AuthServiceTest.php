@@ -4,8 +4,8 @@ namespace Tests\Unit\Services;
 
 use App\Http\Services\AuthService;
 use App\Models\User;
-use Tests\TestCase;
 use Illuminate\Support\Str;
+use Tests\TestCase;
 
 class AuthServiceTest extends TestCase
 {
@@ -45,14 +45,14 @@ class AuthServiceTest extends TestCase
         $email = fake()->safeEmail();
         $resultData = $this->authService->sendVerificationCode($email);
 
-        $this->assertTrue($resultData->status === "success");
+        $this->assertTrue($resultData->status === 'success');
     }
 
     public function test_login_fail_user_not_found()
     {
         $loginData = [
             'email' => fake()->safeEmail(),
-            'password' => Str::random(8)
+            'password' => Str::random(8),
         ];
 
         $resultData = $this->authService->login($loginData);
@@ -65,7 +65,7 @@ class AuthServiceTest extends TestCase
 
         $loginData = [
             'email' => $existingUser->email,
-            'password' => 'afsnkfdlslfks' //random password that not equals to user password
+            'password' => 'afsnkfdlslfks', //random password that not equals to user password
         ];
 
         $resultData = $this->authService->login($loginData);
@@ -78,7 +78,7 @@ class AuthServiceTest extends TestCase
 
         $loginData = [
             'email' => $existingUser->email,
-            'password' => 'password'
+            'password' => 'password',
         ];
 
         $resultData = $this->authService->login($loginData);

@@ -25,7 +25,7 @@ class UpdateUserRequest extends RequestRoot
         return [
             'photo' => 'nullable|file|mimes:jpeg,png,gif|max:2048',
             'name' => 'nullable|string|max:50',
-            'email' => 'nullable|string|email'
+            'email' => 'nullable|string|email',
         ];
     }
 }

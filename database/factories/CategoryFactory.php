@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\URL;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Category>
@@ -19,7 +18,7 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         $name = fake()->word;
-        $image =  env('APP_URL') . '/images/samples/categories/category-' . random_int(1, 6) . '.jpg';
+        $image = env('APP_URL').'/images/samples/categories/category-'.random_int(1, 6).'.jpg';
         $default = fake()->randomElement([0, 1]);
         $type = fake()->randomElement(['expenses', 'incomes']);
 

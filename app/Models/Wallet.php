@@ -15,7 +15,7 @@ class Wallet extends Model
         'name',
         'image',
         'user_id',
-        'default'
+        'default',
     ];
 
     public function user(): BelongsTo

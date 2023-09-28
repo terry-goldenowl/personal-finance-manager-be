@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Categories;
 
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\RequestRoot;
+use Illuminate\Support\Facades\Auth;
 
 class CreateCategoryRequest extends RequestRoot
 {

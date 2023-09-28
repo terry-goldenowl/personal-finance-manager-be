@@ -16,7 +16,7 @@ class CategoryPlan extends Model
         'amount',
         'user_id',
         'category_id',
-        'wallet_id'
+        'wallet_id',
     ];
 
     public function user(): BelongsTo

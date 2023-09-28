@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->double('amount')->default(0);
             $table->string('title');
-            $table->string('description')->nullable()->default("");
+            $table->string('description')->nullable()->default('');
             $table->date('date');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('category_id');
             $table->unsignedBigInteger('wallet_id');
-            $table->string('image')->nullable()->default("");
+            $table->string('image')->nullable()->default('');
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

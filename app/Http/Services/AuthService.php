@@ -7,14 +7,15 @@ use App\Http\Helpers\SuccessfulData;
 use App\Mail\EmailVerification;
 use App\Mail\PasswordReset;
 use App\Models\User;
+use Exception;
 use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Exception;
 
 class AuthService extends BaseService
 {
     protected $verificationCodeServices;
+
     protected $userServices;
 
     public function __construct(
@@ -45,7 +46,7 @@ class AuthService extends BaseService
 
             $newUser = $this->model::create($data);
 
-            if (!$newUser) {
+            if (! $newUser) {
                 return new FailedData('Register user fail!');
             }
 
@@ -78,9 +79,9 @@ class AuthService extends BaseService
             $isCorrectCode = $this->verificationCodeServices->checkExists($email, $verificationCode);
 
             if ($isCorrectCode) {
-                return new SuccessfulData("Verification code is correct!");
+                return new SuccessfulData('Verification code is correct!');
             } else {
-                return new FailedData("Verification code is incorrect!");
+                return new FailedData('Verification code is incorrect!');
             }
         } catch (Exception $error) {
             return new FailedData('Failed to verify verification code!');
@@ -92,11 +93,11 @@ class AuthService extends BaseService
         try {
             $user = $this->userServices->getUserByEmail($data['email']);
 
-            if (!$user) {
-                return new FailedData("User not found!");
+            if (! $user) {
+                return new FailedData('User not found!');
             }
 
-            if (!Hash::check($data['password'], $user->password)) {
+            if (! Hash::check($data['password'], $user->password)) {
                 return new FailedData('Password is not correct!', ['password' => 'Password is not correct!']);
             }
 
@@ -108,7 +109,7 @@ class AuthService extends BaseService
                 [
                     'user' => $user,
                     'token' => $token,
-                    'roles' => $roles
+                    'roles' => $roles,
                 ]
             );
         } catch (Exception $error) {
@@ -121,21 +122,19 @@ class AuthService extends BaseService
         try {
             $user = $this->userServices->getUserByEmail($data['email']);
 
-            if (!$user) {
-                return new FailedData("User with this email does not exists!");
+            if (! $user) {
+                return new FailedData('User with this email does not exists!');
             }
 
-            $tokenExists = app(PasswordBroker::class)->tokenExists($user, Hash::make($data['token']));
-
-            dd(Hash::make($data['token']));
+            $tokenExists = app(PasswordBroker::class)->tokenExists($user, $data['token']);
 
             if ($tokenExists) {
                 $user->password = Hash::make($data['newPassword']);
                 $user->save();
 
-                return new SuccessfulData("Password is updated!");
+                return new SuccessfulData('Password is updated!');
             } else {
-                return new FailedData("Token is invalid!");
+                return new FailedData('Token is invalid!');
             }
         } catch (Exception $error) {
             return new FailedData('Failed to reset password!');
@@ -145,7 +144,7 @@ class AuthService extends BaseService
     public function forgetPassword(string $email): object
     {
         try {
-            if (!$this->userServices->checkExistsByEmail($email)) {
+            if (! $this->userServices->checkExistsByEmail($email)) {
                 return new FailedData('User with this email does not exist!');
             }
 
@@ -154,7 +153,7 @@ class AuthService extends BaseService
             app(PasswordBroker::class)->deleteToken($user);
             $token = app(PasswordBroker::class)->createToken($user);
 
-            $resetLink = config('constants.app_fe_url') . "/reset-password/" . $token;
+            $resetLink = config('constants.app_fe_url').'/reset-password/'.$token;
 
             Mail::to($user)->queue(new PasswordReset($resetLink));
 

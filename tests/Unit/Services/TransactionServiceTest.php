@@ -12,6 +12,7 @@ use Tests\TestCase;
 class TransactionServiceTest extends TestCase
 {
     private $transactionService;
+
     private $user;
 
     protected function setUp(): void
@@ -89,13 +90,44 @@ class TransactionServiceTest extends TestCase
     {
         $maxId = Transaction::select('id')->max('id');
 
-        $resultData = $this->transactionService->update([], $maxId + 1);
+        $resultData = $this->transactionService->update($this->user, [], $maxId + 1);
         $this->assertEquals($resultData->message, 'Transaction not found!');
+    }
+
+    public function test_update_fail_category_not_found()
+    {
+        $maxId = Category::select('id')->max('id');
+        $transaction = Transaction::factory()->create();
+        $transaction->update(['user_id' => $this->user->id]);
+
+        $resultData = $this->transactionService->update($this->user, ['category_id' => $maxId + 1], $transaction->id);
+        $this->assertEquals($resultData->message, 'Category not found!');
+    }
+
+    public function test_update_fail_wallet_not_found()
+    {
+        $maxId = Wallet::select('id')->max('id');
+        $transaction = Transaction::factory()->create();
+        $transaction->update(['user_id' => $this->user->id]);
+
+        $resultData = $this->transactionService->update($this->user, ['wallet_id' => $maxId + 1], $transaction->id);
+        $this->assertEquals($resultData->message, 'Wallet not found!');
     }
 
     public function test_update()
     {
-        $this->assertTrue(true);
+        $transaction = Transaction::factory()->create();
+        $transaction->update(['user_id' => $this->user->id]);
+
+        $data = [
+            'amount' => fake()->randomFloat(0, 1000, 1000000),
+            'title' => fake()->sentences(),
+            'image' => fake()->image(),
+            'date' => fake()->date(),
+        ];
+
+        $resultData = $this->transactionService->update($this->user, $data, $transaction->id);
+        $this->assertTrue($resultData->status === 'success');
     }
 
     public function test_delete_fail_not_found()

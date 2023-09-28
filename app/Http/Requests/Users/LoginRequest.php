@@ -23,8 +23,8 @@ class LoginRequest extends RequestRoot
     public function rules(): array
     {
         return [
-            "email" => ['required', 'string', 'email'],
-            "password" => ['required', Rules\Password::defaults()]
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', Rules\Password::defaults()],
         ];
     }
 }

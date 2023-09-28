@@ -6,11 +6,11 @@ use App\Http\Services\WalletServices;
 use App\Models\User;
 use App\Models\Wallet;
 use Tests\TestCase;
-use Illuminate\Support\Str;
 
 class WalletServiceTest extends TestCase
 {
     private $walletService;
+
     private $user;
 
     protected function setUp(): void
@@ -37,7 +37,7 @@ class WalletServiceTest extends TestCase
         $walletData = [
             'name' => $existingWallet->name,
             'image' => fake()->image(),
-            'default' => fake()->randomElement([true, false])
+            'default' => fake()->randomElement([true, false]),
         ];
 
         $resultData = $this->walletService->create($this->user, $walletData);
@@ -55,7 +55,7 @@ class WalletServiceTest extends TestCase
         $walletData = [
             'name' => $name,
             'image' => fake()->image(),
-            'default' => fake()->randomElement([true, false])
+            'default' => fake()->randomElement([true, false]),
         ];
 
         $resultData = $this->walletService->create($this->user, $walletData);
@@ -105,7 +105,7 @@ class WalletServiceTest extends TestCase
         $walletData = [
             'name' => $name,
             'image' => fake()->image(),
-            'default' => fake()->randomElement([true, false])
+            'default' => fake()->randomElement([true, false]),
         ];
 
         $resultData = $this->walletService->update($walletData, $existingWallet->id);

@@ -11,14 +11,14 @@ class Transaction extends Model
     use HasFactory;
 
     protected $fillable = [
-        "title",
-        "amount",
-        "category_id",
-        "wallet_id",
-        "user_id",
-        "date",
-        "description",
-        "image"
+        'title',
+        'amount',
+        'category_id',
+        'wallet_id',
+        'user_id',
+        'date',
+        'description',
+        'image',
     ];
 
     public function wallet(): BelongsTo

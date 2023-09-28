@@ -5,13 +5,13 @@ namespace Tests\Unit\Services;
 use App\Http\Services\CategoryServices;
 use App\Models\Category;
 use App\Models\User;
-use App\Models\Wallet;
-use Tests\TestCase;
 use Illuminate\Support\Str;
+use Tests\TestCase;
 
 class CategoryServiceTest extends TestCase
 {
     private $categoryService;
+
     private $user;
 
     protected function setUp(): void
@@ -37,7 +37,7 @@ class CategoryServiceTest extends TestCase
         $categoryData = [
             'name' => fake()->name(),
             'image' => fake()->image(),
-            'type' => 'lfslakfjk'
+            'type' => 'lfslakfjk',
         ];
 
         $resultData = $this->categoryService->create($this->user, $categoryData);
@@ -52,7 +52,7 @@ class CategoryServiceTest extends TestCase
         $categoryData = [
             'name' => $existingCategory->name,
             'image' => fake()->image(),
-            'type' => fake()->randomElement(['expenses', 'incomes'])
+            'type' => fake()->randomElement(['expenses', 'incomes']),
         ];
 
         $resultData = $this->categoryService->create($this->user, $categoryData);
@@ -71,7 +71,7 @@ class CategoryServiceTest extends TestCase
         $categoryData = [
             'name' => $name,
             'image' => fake()->image(),
-            'type' => fake()->randomElement(['expenses', 'incomes'])
+            'type' => fake()->randomElement(['expenses', 'incomes']),
         ];
 
         $resultData = $this->categoryService->create($this->user, $categoryData);
@@ -97,7 +97,7 @@ class CategoryServiceTest extends TestCase
             'default' => fake()->randomElement([true, false]),
             'ignore_exists' => true,
             'month' => random_int(1, 12),
-            'year' => random_int(date('Y') - 2,  date('Y') + 2)
+            'year' => random_int(date('Y') - 2, date('Y') + 2),
         ];
 
         $resultData = $this->categoryService->get($this->user, $inputs);
@@ -109,7 +109,7 @@ class CategoryServiceTest extends TestCase
     {
         $inputs = [
             'type' => fake()->randomElement(['expenses', 'incomes']),
-            'search' => Str::random(random_int(1, 10))
+            'search' => Str::random(random_int(1, 10)),
         ];
 
         $resultData = $this->categoryService->getDefault($inputs);
@@ -160,7 +160,7 @@ class CategoryServiceTest extends TestCase
         $categoryData = [
             'name' => $name,
             'image' => fake()->image(),
-            'type' => fake()->randomElement(['expenses', 'incomes'])
+            'type' => fake()->randomElement(['expenses', 'incomes']),
         ];
 
         $resultData = $this->categoryService->update($categoryData, $existingCategory->id);

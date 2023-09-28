@@ -3,7 +3,6 @@
 namespace App\Http\Services;
 
 use App\Http\Helpers\FailedData;
-use App\Http\Helpers\ReturnType;
 use App\Http\Helpers\SuccessfulData;
 use App\Models\MonthPlan;
 use App\Models\User;
@@ -23,8 +22,9 @@ class MonthPlanService extends BaseService
     {
         try {
 
-            if (!$this->walletService->checkExistsById($data['wallet_id']))
+            if (! $this->walletService->checkExistsById($data['wallet_id'])) {
                 return new FailedData('Wallet not found!');
+            }
 
             $planData = array_merge($data, ['user_id' => $user->id]);
 
@@ -43,10 +43,10 @@ class MonthPlanService extends BaseService
     public function get(User $user, array $inputs): object
     {
         try {
-            $month = isset($inputs['month']) ? $inputs["month"] : null;
-            $year = isset($inputs['year']) ? $inputs["year"] : null;
-            $walletId = isset($inputs['wallet_id']) ? $inputs["wallet_id"] : null;
-            $withReport = isset($inputs['with_report']) ? $inputs["with_report"] : null;
+            $month = isset($inputs['month']) ? $inputs['month'] : null;
+            $year = isset($inputs['year']) ? $inputs['year'] : null;
+            $walletId = isset($inputs['wallet_id']) ? $inputs['wallet_id'] : null;
+            $withReport = isset($inputs['with_report']) ? $inputs['with_report'] : null;
 
             $plans = $user->month_plans()->where('year', $year)->where('wallet_id', $walletId);
 
@@ -70,7 +70,7 @@ class MonthPlanService extends BaseService
                 });
             }
 
-            return new SuccessfulData("Get plans successfully", ['plans' => $plans]);
+            return new SuccessfulData('Get plans successfully', ['plans' => $plans]);
         } catch (Exception $error) {
             return new FailedData('Failed to get month plans!');
         }
@@ -80,15 +80,15 @@ class MonthPlanService extends BaseService
     {
         try {
             $plan = $this->getById($id);
-            if (!$plan) {
-                return new FailedData("Month plan not found!");
+            if (! $plan) {
+                return new FailedData('Month plan not found!');
             }
 
             $planData = array_merge($data, ['user_id' => $user->id]);
 
             $updated = $plan->update($planData);
 
-            if (!$updated) {
+            if (! $updated) {
                 return new FailedData('Plan is not created!');
             }
 
@@ -102,9 +102,10 @@ class MonthPlanService extends BaseService
     {
         try {
             $deleted = $this->model::destroy($id);
-            if (!$deleted) {
+            if (! $deleted) {
                 return new FailedData('Delete fails or plan not found!');
             }
+
             return new SuccessfulData('Delete plan successfully!');
         } catch (Exception $error) {
             return new FailedData('Failed to delete month plan!');
@@ -122,7 +123,7 @@ class MonthPlanService extends BaseService
             'user_id' => $data['user_id'],
             'month' => $data['month'],
             'year' => $data['year'],
-            'wallet_id' => $data['wallet_id']
+            'wallet_id' => $data['wallet_id'],
         ])->exists();
     }
 

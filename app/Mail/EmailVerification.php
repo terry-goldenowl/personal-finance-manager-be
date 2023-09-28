@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
@@ -39,7 +38,7 @@ class EmailVerification extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.email-verification',
+            view: 'emails.email-verification',
         );
     }
 

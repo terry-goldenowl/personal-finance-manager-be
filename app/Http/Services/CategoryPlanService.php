@@ -3,9 +3,7 @@
 namespace App\Http\Services;
 
 use App\Http\Helpers\FailedData;
-use App\Http\Helpers\ReturnType;
 use App\Http\Helpers\SuccessfulData;
-use App\Models\Category;
 use App\Models\CategoryPlan;
 use App\Models\User;
 use Exception;
@@ -13,6 +11,7 @@ use Exception;
 class CategoryPlanService extends BaseService
 {
     protected $categoryService;
+
     protected $walletService;
 
     public function __construct(CategoryServices $categoryService, WalletServices $walletService)
@@ -26,10 +25,11 @@ class CategoryPlanService extends BaseService
     {
         try {
 
-            if (!$this->walletService->checkExistsById($data['wallet_id']))
+            if (! $this->walletService->checkExistsById($data['wallet_id'])) {
                 return new FailedData('Wallet not found!');
+            }
 
-            if (!$this->categoryService->checkExistsById($data['category_id'])) {
+            if (! $this->categoryService->checkExistsById($data['category_id'])) {
                 return new FailedData('Category not found!');
             }
 
@@ -39,7 +39,7 @@ class CategoryPlanService extends BaseService
                 if ($category->default == 1) {
                     $userCategory = $this->categoryService->getWithSameNameOfUser($user->id, $category->id, $category->name);
 
-                    if (!$userCategory) {
+                    if (! $userCategory) {
                         $category = $this->categoryService->createBasedOnDefault($user->id, $category);
                         $data['category_id'] = $category->id;
                     } else {
@@ -65,11 +65,11 @@ class CategoryPlanService extends BaseService
     public function get(User $user, array $inputs): object
     {
         try {
-            $month = isset($inputs['month']) ? $inputs["month"] : null;
-            $year = isset($inputs['year']) ? $inputs["year"] : null;
-            $walletId = isset($inputs['wallet_id']) ? $inputs["wallet_id"] : null;
-            $categoryId = isset($inputs['category_id']) ? $inputs["category_id"] : null;
-            $withReport = isset($inputs['with_report']) ? $inputs["with_report"] : null;
+            $month = isset($inputs['month']) ? $inputs['month'] : null;
+            $year = isset($inputs['year']) ? $inputs['year'] : null;
+            $walletId = isset($inputs['wallet_id']) ? $inputs['wallet_id'] : null;
+            $categoryId = isset($inputs['category_id']) ? $inputs['category_id'] : null;
+            $withReport = isset($inputs['with_report']) ? $inputs['with_report'] : null;
 
             $plans = $user->category_plans()->where('month', $month)->where('year', $year)->where('wallet_id', $walletId)->with('category');
 
@@ -86,21 +86,22 @@ class CategoryPlanService extends BaseService
 
             if ($withReport) {
                 $report = app(ReportService::class)->get($user, [
-                    'year' => $year, 'month' => $month, 'wallet' => $walletId, 'report_type' => 'categories'
+                    'year' => $year, 'month' => $month, 'wallet' => $walletId, 'report_type' => 'categories',
                 ]);
 
                 $plans = $plans->map(function ($plan) use ($report) {
 
-                    if (isset($report->getData()['reports'][$plan->category_id . ""])) {
-                        $plan = (object) array_merge($plan->toArray(), ['actual' => $report->getData()['reports'][$plan->category_id . ""]['amount']]);
+                    if (isset($report->getData()['reports'][$plan->category_id.''])) {
+                        $plan = (object) array_merge($plan->toArray(), ['actual' => $report->getData()['reports'][$plan->category_id.'']['amount']]);
                     } else {
                         $plan = (object) array_merge($plan->toArray(), ['actual' => 0]);
                     }
+
                     return $plan;
                 });
             }
 
-            return new SuccessfulData("Get plans successfully", ['plans' => $plans]);
+            return new SuccessfulData('Get plans successfully', ['plans' => $plans]);
         } catch (Exception $error) {
             return new FailedData('Failed to get category plans!');
         }
@@ -111,15 +112,15 @@ class CategoryPlanService extends BaseService
         try {
             $plan = $this->getById($id);
 
-            if (!$plan) {
-                return new FailedData("Category plan not found!");
+            if (! $plan) {
+                return new FailedData('Category plan not found!');
             }
 
             $planData = array_merge($data, ['user_id' => $user->id]);
 
             $updated = $plan->update($planData);
 
-            if (!$updated) {
+            if (! $updated) {
                 return new FailedData('Something went wrong when update category plan');
             }
 
@@ -133,9 +134,10 @@ class CategoryPlanService extends BaseService
     {
         try {
             $deleted = $this->model::destroy($id);
-            if (!$deleted) {
+            if (! $deleted) {
                 return new FailedData('Delete fails or plan not found!');
             }
+
             return new SuccessfulData('Delete plan successfully!');
         } catch (Exception $error) {
             return new FailedData('Failed to delete category plan!');
@@ -159,7 +161,7 @@ class CategoryPlanService extends BaseService
             'month' => $data['month'],
             'year' => $data['year'],
             'category_id' => $data['category_id'],
-            'wallet_id' => $data['wallet_id']
+            'wallet_id' => $data['wallet_id'],
         ])->exists();
     }
 

@@ -26,7 +26,7 @@ class CreateMonthPlanRequest extends RequestRoot
             'month' => 'numeric|required',
             'year' => 'numeric|required',
             'amount' => 'numeric|required',
-            'wallet_id' => 'numeric|required'
+            'wallet_id' => 'numeric|required',
         ];
     }
 }

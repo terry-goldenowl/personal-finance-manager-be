@@ -10,7 +10,7 @@ class TemporaryVerificationCode extends Model
     use HasFactory;
 
     protected $fillable = [
-        "email",
-        "code"
+        'email',
+        'code',
     ];
 }
