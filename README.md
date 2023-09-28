@@ -13,7 +13,7 @@
     Help you master your money effectively!
     <br />
     <br />
-    <a href="#">View Demo</a>
+    <a href="https://money-master-nine.vercel.app/">View Demo</a>
     ·
     <a href="https://github.com/terry-goldenowl/personal-finance-manager-fe/issues">Report Bug</a>
     ·
@@ -31,6 +31,9 @@
       <a href="#about-the-project">About The Project</a>
       <ul>
         <li><a href="#built-with">Built With</a></li>
+        <li><a href="#project-folder-structure">Project Folder Structure</a></li>
+        <li><a href="#architecture-diagram">Architecture Diagram</a></li>
+        <li><a href="#db-diagram">DB Diagram</a></li>
       </ul>
     </li>
     <li>
@@ -143,8 +146,11 @@ This section should list any major frameworks/libraries used to bootstrap your p
     └───Unit
 ```
 
-## Architecture Diagram
+### Architecture Diagram
 ![image](https://github.com/terry-goldenowl/personal-finance-manager-be/assets/138744655/9f09766f-bcca-4fe7-acf0-5297010f8a80)
+
+### DB Diagram
+[![](https://mermaid.ink/img/pako:eNqN0dEKgjAUBuBXOZxre4HdjZIKTEMXEQxiuFNKmTHdRczePaUiMot2ez7O_7PjMC01IUMyk1ztjSrkCdq3SvwYmmY0ahyseRD4gkGmqt6wdDDmwp9G8ebLWMQ8TPhYzKOQQWpI1fSJFlEoZttlwH-YZ84Au_cbSAQGEm1FGnalkTikX9F_4LcOg_4p_i3T978T0MOCTKFy3R7MdRsk1hkVJLGjWplDx66tU7Yuk8spRVYbSx7as27_63FiZDt1rOh6AzyDmkE?type=png)](https://mermaid.live/edit#pako:eNqN0dEKgjAUBuBXOZxre4HdjZIKTEMXEQxiuFNKmTHdRczePaUiMot2ez7O_7PjMC01IUMyk1ztjSrkCdq3SvwYmmY0ahyseRD4gkGmqt6wdDDmwp9G8ebLWMQ8TPhYzKOQQWpI1fSJFlEoZttlwH-YZ84Au_cbSAQGEm1FGnalkTikX9F_4LcOg_4p_i3T978T0MOCTKFy3R7MdRsk1hkVJLGjWplDx66tU7Yuk8spRVYbSx7as27_63FiZDt1rOh6AzyDmkE)
 
 
 <!-- GETTING STARTED -->
@@ -216,9 +222,6 @@ You can now access the server at http://localhost:8000
   * Manage profile
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## DB Diagram
-[![](https://mermaid.ink/img/pako:eNqN0dEKgjAUBuBXOZxre4HdjZIKTEMXEQxiuFNKmTHdRczePaUiMot2ez7O_7PjMC01IUMyk1ztjSrkCdq3SvwYmmY0ahyseRD4gkGmqt6wdDDmwp9G8ebLWMQ8TPhYzKOQQWpI1fSJFlEoZttlwH-YZ84Au_cbSAQGEm1FGnalkTikX9F_4LcOg_4p_i3T978T0MOCTKFy3R7MdRsk1hkVJLGjWplDx66tU7Yuk8spRVYbSx7as27_63FiZDt1rOh6AzyDmkE?type=png)](https://mermaid.live/edit#pako:eNqN0dEKgjAUBuBXOZxre4HdjZIKTEMXEQxiuFNKmTHdRczePaUiMot2ez7O_7PjMC01IUMyk1ztjSrkCdq3SvwYmmY0ahyseRD4gkGmqt6wdDDmwp9G8ebLWMQ8TPhYzKOQQWpI1fSJFlEoZttlwH-YZ84Au_cbSAQGEm1FGnalkTikX9F_4LcOg_4p_i3T978T0MOCTKFy3R7MdRsk1hkVJLGjWplDx66tU7Yuk8spRVYbSx7as27_63FiZDt1rOh6AzyDmkE)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
