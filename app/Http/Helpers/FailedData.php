@@ -12,9 +12,11 @@ class FailedData extends BaseData
     ) {
         parent::__construct($message, 'failed');
 
-        if (!$error) {
+        if (! $error) {
             $this->error = ['error' => $message];
-        } else $this->error = $error;
+        } else {
+            $this->error = $error;
+        }
     }
 
     public function get(): array

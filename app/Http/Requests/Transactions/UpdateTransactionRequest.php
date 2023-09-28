@@ -29,7 +29,7 @@ class UpdateTransactionRequest extends RequestRoot
             'amount' => 'nullable|numeric|min:0',
             'date' => 'nullable|date',
             'description' => 'nullable|string',
-            'image' => 'nullable|file|mimes:jpeg,jpg,png,gif|max:2048'
+            'image' => 'nullable|file|mimes:jpeg,jpg,png,gif|max:2048',
         ];
     }
 }

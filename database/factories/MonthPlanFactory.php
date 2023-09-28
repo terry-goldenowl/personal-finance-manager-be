@@ -34,7 +34,7 @@ class MonthPlanFactory extends Factory
             'year' => $year,
             'amount' => fake()->numberBetween(1000000, 10000000),
             'user_id' => $userId,
-            'wallet_id' => $walletId
+            'wallet_id' => $walletId,
         ];
     }
 }

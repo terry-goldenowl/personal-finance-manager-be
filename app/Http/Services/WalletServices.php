@@ -3,7 +3,6 @@
 namespace App\Http\Services;
 
 use App\Http\Helpers\FailedData;
-use App\Http\Helpers\ReturnType;
 use App\Http\Helpers\StorageHelper;
 use App\Http\Helpers\SuccessfulData;
 use App\Models\User;
@@ -22,11 +21,11 @@ class WalletServices extends BaseService
     {
         try {
             if ($this->checkExistsByName($user->id, $data['name'])) {
-                return new FailedData("This wallet name has been used!", ['name' => "This wallet name has been used!"]);
+                return new FailedData('This wallet name has been used!', ['name' => 'This wallet name has been used!']);
             }
 
             $image = isset($data['image']) ? $data['image'] : null;
-            $imageUrl = StorageHelper::store($image, "/public/images/wallets");
+            $imageUrl = StorageHelper::store($image, '/public/images/wallets');
 
             $walletData = array_merge($data, ['user_id' => $user->id, 'image' => $imageUrl]);
 
@@ -58,7 +57,7 @@ class WalletServices extends BaseService
                 return $wallet;
             });
 
-            return new SuccessfulData("Get wallets successfully", ['wallets' => $wallets]);
+            return new SuccessfulData('Get wallets successfully', ['wallets' => $wallets]);
         } catch (Exception $error) {
             return new FailedData('Something went wrong when fetching wallets!', ['error' => $error]);
         }
@@ -88,7 +87,7 @@ class WalletServices extends BaseService
         try {
 
             $wallet = $this->getById($id);
-            if (!$wallet) {
+            if (! $wallet) {
                 return new FailedData('Wallet not found!');
             }
 
@@ -101,7 +100,7 @@ class WalletServices extends BaseService
                 }
 
                 // STORE AND RETREIVE NEW IMAGE
-                $imageUrl = StorageHelper::store($image, "/public/images/categories");
+                $imageUrl = StorageHelper::store($image, '/public/images/categories');
             }
 
             $data = $image ? array_merge($data, ['image' => $imageUrl]) : $data;
@@ -123,7 +122,7 @@ class WalletServices extends BaseService
         try {
             $wallet = $this->getById($id);
 
-            if (!$wallet) {
+            if (! $wallet) {
                 return new FailedData('Wallet not found!');
             }
 

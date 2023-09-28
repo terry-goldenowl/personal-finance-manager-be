@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Http\Helpers\ReturnType;
 use App\Http\Controllers\Controller;
 use App\Http\Helpers\MyResponse;
 use App\Http\Services\ReportService;
@@ -17,19 +16,22 @@ class ReportsController extends Controller
     public function get(Request $request)
     {
         $returnData = $this->reportService->get($request->user(), $request->all());
-        return (new MyResponse($returnData))->get();;
+
+        return (new MyResponse($returnData))->get();
     }
 
     public function getUserQuantityPerMonth(Request $request)
     {
         $returnData = $this->reportService->getUserQuantityPerMonth($request->all());
-        return (new MyResponse($returnData))->get();;
+
+        return (new MyResponse($returnData))->get();
     }
 
     public function getTransactionQuantityPerMonth(Request $request)
     {
         $returnData = $this->reportService->getTransactionQuantityPerMonth($request->all());
-        return (new MyResponse($returnData))->get();;
+
+        return (new MyResponse($returnData))->get();
     }
 
     public function export(Request $request)

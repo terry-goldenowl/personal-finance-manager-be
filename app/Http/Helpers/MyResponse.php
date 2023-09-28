@@ -5,12 +5,13 @@ namespace App\Http\Helpers;
 class MyResponse
 {
     private int $httpCode;
+
     private BaseData $data;
 
     public function __construct(
         BaseData $data,
     ) {
-        if (!isset($httpCode)) {
+        if (! isset($httpCode)) {
             if ($data instanceof SuccessfulData) {
                 $this->httpCode = 200;
             } else {

@@ -24,9 +24,9 @@ class RegisterUserRequest extends RequestRoot
     public function rules(): array
     {
         return [
-            "name" => ['required', 'string', 'max:50'],
-            "email" => ['required', 'string', 'email', 'unique:' . User::class],
-            "password" => ['required', 'confirmed', 'min:8', 'max:30', Rules\Password::defaults()]
+            'name' => ['required', 'string', 'max:50'],
+            'email' => ['required', 'string', 'email', 'unique:'.User::class],
+            'password' => ['required', 'confirmed', 'min:8', 'max:30', Rules\Password::defaults()],
         ];
     }
 }

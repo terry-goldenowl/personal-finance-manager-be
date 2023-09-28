@@ -15,7 +15,7 @@ class MonthPlan extends Model
         'year',
         'amount',
         'wallet_id',
-        'user_id'
+        'user_id',
     ];
 
     public function user(): BelongsTo

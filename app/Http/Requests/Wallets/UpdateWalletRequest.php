@@ -25,7 +25,7 @@ class UpdateWalletRequest extends RequestRoot
         return [
             'name' => 'string|nullable',
             'image' => 'nullable|file|mimes:jpeg,png,gif|max:2048',
-            'default' => 'boolean|nullable'
+            'default' => 'boolean|nullable',
         ];
     }
 }

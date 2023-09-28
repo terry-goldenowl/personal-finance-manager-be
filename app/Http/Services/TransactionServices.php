@@ -2,9 +2,7 @@
 
 namespace App\Http\Services;
 
-use App\Exports\ReportExport;
 use App\Http\Helpers\FailedData;
-use App\Http\Helpers\ReturnType;
 use App\Http\Helpers\StorageHelper;
 use App\Http\Helpers\SuccessfulData;
 use App\Models\Transaction;
@@ -12,11 +10,11 @@ use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
-use Maatwebsite\Excel\Facades\Excel;
 
 class TransactionServices extends BaseService
 {
     protected $categoryService;
+
     protected $walletService;
 
     public function __construct(CategoryServices $categoryService, WalletServices $walletService)
@@ -29,11 +27,13 @@ class TransactionServices extends BaseService
     public function create(User $user, array $data): object
     {
         try {
-            if (!$this->categoryService->checkExistsById($data['category_id']))
+            if (! $this->categoryService->checkExistsById($data['category_id'])) {
                 return new FailedData('Category not found!');
+            }
 
-            if (!$this->walletService->checkExistsById($data['wallet_id']))
+            if (! $this->walletService->checkExistsById($data['wallet_id'])) {
                 return new FailedData('Wallet not found!');
+            }
 
             $transactionData = array_merge($data, ['user_id' => $user->id]);
 
@@ -51,7 +51,7 @@ class TransactionServices extends BaseService
             // STORE AND RETREIVE IMAGE
             $image = isset($data['image']) ? $data['image'] : null;
             if ($image) {
-                $imageUrl = StorageHelper::store($image, "/public/images/transactions");
+                $imageUrl = StorageHelper::store($image, '/public/images/transactions');
                 $transactionData = array_merge($transactionData, ['image' => $imageUrl]);
             }
 
@@ -66,14 +66,14 @@ class TransactionServices extends BaseService
     public function get(User $user, array $inputs): object
     {
         try {
-            $day = isset($inputs['day']) ? $inputs["day"] : null;
-            $month = isset($inputs['month']) ? $inputs["month"] : null;
-            $year = isset($inputs['year']) ? $inputs["year"] : null;
-            $wallet = isset($inputs['wallet']) ? $inputs["wallet"] : null;
-            $category = isset($inputs['category']) ? $inputs["category"] : null;
-            $transactionType = isset($inputs['transaction_type']) ? $inputs["transaction_type"] : 'total';
-            $search = isset($inputs['search']) ? $inputs["search"] : "";
-            $page = isset($inputs['page']) ? $inputs["page"] : null;
+            $day = isset($inputs['day']) ? $inputs['day'] : null;
+            $month = isset($inputs['month']) ? $inputs['month'] : null;
+            $year = isset($inputs['year']) ? $inputs['year'] : null;
+            $wallet = isset($inputs['wallet']) ? $inputs['wallet'] : null;
+            $category = isset($inputs['category']) ? $inputs['category'] : null;
+            $transactionType = isset($inputs['transaction_type']) ? $inputs['transaction_type'] : 'total';
+            $search = isset($inputs['search']) ? $inputs['search'] : '';
+            $page = isset($inputs['page']) ? $inputs['page'] : null;
 
             $query = $user->transactions();
 
@@ -104,7 +104,7 @@ class TransactionServices extends BaseService
             }
 
             if (strlen($search) > 0) {
-                $query->where('title', 'LIKE', '%' . ($search) . '%')->orWhere('description', 'LIKE', '%' . $search . '%');
+                $query->where('title', 'LIKE', '%'.($search).'%')->orWhere('description', 'LIKE', '%'.$search.'%');
             }
 
             if ($page) {
@@ -114,7 +114,7 @@ class TransactionServices extends BaseService
 
             $transactions = $query->orderBy('date', 'desc')->with('category')->get();
 
-            return new SuccessfulData("", ['transactions' => $transactions]);
+            return new SuccessfulData('', ['transactions' => $transactions]);
         } catch (Exception $error) {
             return new FailedData('Failed to get transactions!');
         }
@@ -137,18 +137,20 @@ class TransactionServices extends BaseService
     {
         try {
             $transaction = $this->getById($id);
-            if (!$transaction) {
+            if (! $transaction) {
                 return new FailedData('Transaction not found!');
             }
 
             if (isset($data['category_id'])) {
-                if (!$this->categoryService->checkExistsById($data['category_id']))
+                if (! $this->categoryService->checkExistsById($data['category_id'])) {
                     return new FailedData('Category not found!');
+                }
             }
 
             if (isset($data['wallet_id'])) {
-                if (!$this->walletService->checkExistsById($data['wallet_id']))
+                if (! $this->walletService->checkExistsById($data['wallet_id'])) {
                     return new FailedData('Wallet not found!');
+                }
             }
 
             $image = isset($data['image']) ? $data['image'] : null;
@@ -160,7 +162,7 @@ class TransactionServices extends BaseService
                 }
 
                 // STORE AND RETREIVE NEW IMAGE
-                $imageUrl = StorageHelper::store($image, "/public/images/transactions");
+                $imageUrl = StorageHelper::store($image, '/public/images/transactions');
             }
 
             $transactionData = $image ? array_merge($data, ['user_id' => $user->id, 'image' => $imageUrl])
@@ -168,7 +170,7 @@ class TransactionServices extends BaseService
 
             $updated = $transaction->update($transactionData);
 
-            if (!$updated) {
+            if (! $updated) {
                 return new FailedData('Update transaction failed!');
             }
 
@@ -182,7 +184,7 @@ class TransactionServices extends BaseService
     {
         try {
             $transaction = $this->getById($id);
-            if (!$transaction) {
+            if (! $transaction) {
                 return new FailedData('Transaction not found!');
             }
 
@@ -192,7 +194,7 @@ class TransactionServices extends BaseService
             }
 
             $deleted = $this->model::destroy($id);
-            if (!$deleted) {
+            if (! $deleted) {
                 return new FailedData('Can not delete transaction!');
             }
 
@@ -237,7 +239,7 @@ class TransactionServices extends BaseService
                 $years = [2023];
             }
 
-            return new SuccessfulData('Get years of plans successfully!', ['years' => $years]);
+            return new SuccessfulData('Get years of transactions successfully!', ['years' => $years]);
         } catch (Exception $error) {
             return new FailedData('Failed to get transactions years!');
         }

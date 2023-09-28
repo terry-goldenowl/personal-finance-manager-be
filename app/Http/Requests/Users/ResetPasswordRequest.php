@@ -19,7 +19,7 @@ class ResetPasswordRequest extends RequestRoot
         return [
             'newPassword' => 'required|string|confirmed|min:8',
             'token' => 'required|string',
-            'email' => 'required|email'
+            'email' => 'required|email',
         ];
     }
 }

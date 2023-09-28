@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ReportExport implements FromCollection, WithStyles, ShouldAutoSize, WithHeadings, WithColumnWidths
+class ReportExport implements FromCollection, ShouldAutoSize, WithColumnWidths, WithHeadings, WithStyles
 {
     public function __construct(
         private int $month,
@@ -25,9 +25,10 @@ class ReportExport implements FromCollection, WithStyles, ShouldAutoSize, WithHe
         $data = Transaction::whereMonth('date', $this->month)
             ->whereYear('date', $this->year)
             ->where('transactions.user_id', $this->userId)
-            ->join('categories', 'transactions.category_id', "=", "categories.id")
-            ->join('wallets', 'transactions.wallet_id', "=", "wallets.id")
-            ->select('date', 'title', 'amount', 'description',  'categories.type', 'categories.name')
+            ->join('categories', 'transactions.category_id', '=', 'categories.id')
+            ->join('wallets', 'transactions.wallet_id', '=', 'wallets.id')
+            ->select('date', 'title', 'amount', 'description', 'categories.type', 'categories.name')
+            ->orderBy('date', 'desc')
             ->get();
 
         return collect([$this->headings()])->concat($data);
@@ -36,14 +37,14 @@ class ReportExport implements FromCollection, WithStyles, ShouldAutoSize, WithHe
     public function styles(Worksheet $sheet)
     {
         $sheet->mergeCells('A1:F1');
-        $sheet->setCellValue('A1', 'Transactions of month ' . $this->month . '/' . $this->year);
+        $sheet->setCellValue('A1', 'Transactions of month '.$this->month.'/'.$this->year);
         $sheet->getRowDimension(1)->setRowHeight(30);
 
         $typeColumn = 'E';
         $rowCount = $sheet->getHighestDataRow($typeColumn);
 
         for ($row = 3; $row <= $rowCount; $row++) {
-            $cellRange = $typeColumn . $row;
+            $cellRange = $typeColumn.$row;
             $sheet->getStyle($cellRange)->applyFromArray([
                 'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
@@ -55,10 +56,9 @@ class ReportExport implements FromCollection, WithStyles, ShouldAutoSize, WithHe
         return [
             1 => [
                 'font' => ['bold' => true, 'color' => ['argb' => '000000']],
-                'fill' =>
-                [
+                'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                    'color' => ['argb' => 'E9D5FF']
+                    'color' => ['argb' => 'E9D5FF'],
                 ],
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
@@ -67,14 +67,13 @@ class ReportExport implements FromCollection, WithStyles, ShouldAutoSize, WithHe
             ],
             2 => [
                 'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFF']],
-                'fill' =>
-                [
+                'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                    'color' => ['argb' => 'A855F7']
+                    'color' => ['argb' => 'A855F7'],
                 ],
             ],
             'C' => [
-                'font' => ['bold' => true]
+                'font' => ['bold' => true],
             ],
         ];
     }
@@ -87,7 +86,7 @@ class ReportExport implements FromCollection, WithStyles, ShouldAutoSize, WithHe
             'Amount',
             'Description',
             'Type',
-            'Category'
+            'Category',
         ];
     }
 
@@ -99,7 +98,7 @@ class ReportExport implements FromCollection, WithStyles, ShouldAutoSize, WithHe
     public function columnWidths(): array
     {
         return [
-            'D' => 40
+            'D' => 40,
         ];
     }
 }

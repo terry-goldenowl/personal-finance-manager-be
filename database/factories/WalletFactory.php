@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\URL;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Wallet>
@@ -23,7 +22,7 @@ class WalletFactory extends Factory
         $randomUserId = fake()->randomElement($userIds);
 
         $isAlreadyHaveDefault = Wallet::where(['user_id' => $randomUserId, 'default' => 1])->exists();
-        $default = !$isAlreadyHaveDefault;
+        $default = ! $isAlreadyHaveDefault;
 
         do {
             $name = fake()->word;
@@ -32,7 +31,7 @@ class WalletFactory extends Factory
         return [
             'name' => $name,
             'user_id' => $randomUserId,
-            'image' => env('APP_URL') . '/images/samples/wallets/wallet-' . random_int(1, 4) . ".jpg",
+            'image' => env('APP_URL').'/images/samples/wallets/wallet-'.random_int(1, 4).'.jpg',
             'default' => $default,
         ];
     }

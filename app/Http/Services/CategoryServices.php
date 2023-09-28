@@ -3,7 +3,6 @@
 namespace App\Http\Services;
 
 use App\Http\Helpers\FailedData;
-use App\Http\Helpers\ReturnType;
 use App\Http\Helpers\StorageHelper;
 use App\Http\Helpers\SuccessfulData;
 use App\Models\Category;
@@ -15,7 +14,6 @@ use Illuminate\Support\Str;
 
 class CategoryServices extends BaseService
 {
-
     public function __construct()
     {
         parent::__construct(Category::class);
@@ -26,22 +24,22 @@ class CategoryServices extends BaseService
         $isUserCategoryExists = Category::where('user_id', $userId)->where('name', $name)->exists();
         $isDefaultCategoryExists = Category::whereNull('user_id')->where('name', $name)->exists();
 
-        return ($isUserCategoryExists || $isDefaultCategoryExists);
+        return $isUserCategoryExists || $isDefaultCategoryExists;
     }
 
     public function create(User $user, array $data): object
     {
         try {
             if (!in_array($data['type'], ['incomes', 'expenses'])) {
-                return new FailedData('Invalid type', ['type' => "Type is invalid! Available types: [incomes, expenses]"]);
+                return new FailedData('Invalid type', ['type' => 'Type is invalid! Available types: [incomes, expenses]']);
             }
 
             if ($this->checkExists($user->id, $data['name'])) {
-                return new FailedData('Category name has been used', ['name' => "This category name has been used!"]);
+                return new FailedData('Category name has been used', ['name' => 'This category name has been used!']);
             }
 
             $image = $data['image'];
-            $imageUrl = StorageHelper::store($image, "/public/images/categories");
+            $imageUrl = StorageHelper::store($image, '/public/images/categories');
 
             if ($user->hasRole('user')) {
                 $categoryData = array_merge($data, ['user_id' => $user->id, 'image' => $imageUrl, 'default' => false]);
@@ -62,27 +60,31 @@ class CategoryServices extends BaseService
     {
         try {
             $type = isset($inputs['type']) ? $inputs['type'] : null;
-            $default = isset($inputs['default']) ?  $inputs['default'] : null;
-            $ingoreExists = isset($inputs['ignore_exists']) ?  $inputs['ignore_exists'] : null;
-            $month = isset($inputs['month']) ?  $inputs['month'] : null;
-            $year = isset($inputs['year']) ?  $inputs['year'] : null;
-            $withPlan = isset($inputs['with_plan']) ?  $inputs['with_plan'] : null;
-            $walletId = isset($inputs['wallet_id']) ?  $inputs['wallet_id'] : null;
+            $default = isset($inputs['default']) ? $inputs['default'] : null;
+            $ingoreExists = isset($inputs['ignore_exists']) ? $inputs['ignore_exists'] : null;
+            $month = isset($inputs['month']) ? $inputs['month'] : null;
+            $year = isset($inputs['year']) ? $inputs['year'] : null;
+            $withPlan = isset($inputs['with_plan']) ? $inputs['with_plan'] : null;
+            $walletId = isset($inputs['wallet_id']) ? $inputs['wallet_id'] : null;
 
             $categories = $this->model::query();
 
             if ($ingoreExists && $month && $year) {
                 $categories->where('user_id', $user->id)
                     ->orWhereNull('user_id')
-                    ->leftJoin('category_plans', 'categories.id', '=', 'category_plans.category_id')
-                    ->where('category_plans.month', $month)
-                    ->where('category_plans.year', $year)
-                    ->whereNull('products.category_id')->select('categories.*');
+                    ->whereNotIn('id', function ($query) use ($month, $year, $user) {
+                        $query->select('category_id')
+                            ->from('category_plans')
+                            ->where('month', $month)
+                            ->where('year', $year)
+                            ->where('user_id', $user->id);
+                    });
             }
 
             $categoriesTemp = clone $categories;
             $countNames = $categoriesTemp->where('user_id', $user->id)
                 ->orWhereNull('user_id')->select('name', DB::raw('count(*) as count'))->groupBy('name')->distinct()->get()->toArray();
+
 
             $categories = $categories->where('user_id', $user->id)->orWhereNull('user_id')->get()->filter(function ($category) use ($countNames, $default) {
                 if (!is_null($default)) {
@@ -92,11 +94,15 @@ class CategoryServices extends BaseService
                         $includeDefault = is_null($category->user_id);
                     }
                     foreach ($countNames as $name) {
-                        if ($name['name'] == $category->name && $name['count'] > 1 && $includeDefault) return false;
+                        if ($name['name'] == $category->name && $name['count'] > 1 && $includeDefault) {
+                            return false;
+                        }
                     }
                 } else {
                     foreach ($countNames as $name) {
-                        if ($name['name'] == $category->name && is_null($category->user_id) && $name['count'] > 1) return false;
+                        if ($name['name'] == $category->name && is_null($category->user_id) && $name['count'] > 1) {
+                            return false;
+                        }
                     }
                 }
 
@@ -133,7 +139,7 @@ class CategoryServices extends BaseService
                 });
             }
 
-            return new SuccessfulData("Get categories successfully", ['categories' => $categories]);
+            return new SuccessfulData('Get categories successfully', ['categories' => $categories]);
         } catch (Exception $error) {
             return new FailedData('Failed to get categories', ['error' => $error]);
         }
@@ -151,7 +157,7 @@ class CategoryServices extends BaseService
             }
 
             if ($search) {
-                $categories->where('name', 'LIKE', "%" . $search . "%");
+                $categories->where('name', 'LIKE', '%' . $search . '%');
             }
 
             $categories = $categories->get()->map(function ($category) {
@@ -169,6 +175,7 @@ class CategoryServices extends BaseService
 
                 $category->transactions_count = $transactionsCount;
                 $category->users_count = $usersCount;
+
                 return $category;
             });
 
@@ -206,13 +213,13 @@ class CategoryServices extends BaseService
                 }
 
                 // STORE AND RETREIVE NEW IMAGE
-                $imageUrl = StorageHelper::store($image, "/public/images/categories");
+                $imageUrl = StorageHelper::store($image, '/public/images/categories');
             }
 
             $data = $image ? array_merge($data, ['image' => $imageUrl]) : $data;
             $updated = $category->update($data);
 
-            if (!!!$updated) {
+            if (!(bool) $updated) {
                 return new FailedData('Update fails or category not found!');
             }
 
@@ -311,7 +318,7 @@ class CategoryServices extends BaseService
             'type' => $defaultCategory->type,
             'image' => $defaultCategory->image,
             'user_id' => $userId,
-            'default' => false
+            'default' => false,
         ]);
     }
 }

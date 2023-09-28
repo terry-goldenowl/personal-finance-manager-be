@@ -79,6 +79,7 @@ Route::prefix('v1')->group(function () {
         Route::middleware(['role:admin'])->group(function () {
             Route::get('/users', [UserController::class, 'getAll'])->name('get-users');
             Route::get('/users/count', [UserController::class, 'getCounts'])->name('get-users-count');
+            Route::get('/users/years', [UserController::class, 'getYears'])->name('get-users-years');
             Route::delete('/users/{id}', [UserController::class, 'deleteById'])->name('delete-user-by-id');
 
             Route::get('/transactions/count', [TransactionsController::class, 'getCounts'])->name('get-transactions-count');
@@ -87,8 +88,8 @@ Route::prefix('v1')->group(function () {
             Route::get('/categories/default/count', [CategoriesController::class, 'getDefaultCount'])->name('get-default-count');
             Route::delete('/categories/default/{id}', [CategoriesController::class, 'deleteDefault'])->name('delete-default-categories');
 
-            Route::get("/reports/users-per-month", [ReportsController::class, 'getUserQuantityPerMonth'])->name('get-user-quantity-per-month');
-            Route::get("/reports/transactions-per-month", [ReportsController::class, 'getTransactionQuantityPerMonth'])->name('get-transaction-quantity-per-month');
+            Route::get('/reports/users-per-month', [ReportsController::class, 'getUserQuantityPerMonth'])->name('get-user-quantity-per-month');
+            Route::get('/reports/transactions-per-month', [ReportsController::class, 'getTransactionQuantityPerMonth'])->name('get-transaction-quantity-per-month');
         });
 
         // Users

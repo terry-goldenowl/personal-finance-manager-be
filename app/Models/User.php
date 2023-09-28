@@ -15,7 +15,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements CanResetPassword
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -26,7 +26,7 @@ class User extends Authenticatable implements CanResetPassword
         'name',
         'email',
         'password',
-        'photo'
+        'photo',
     ];
 
     /**
@@ -38,7 +38,7 @@ class User extends Authenticatable implements CanResetPassword
         'password',
         'remember_token',
         'verification_code',
-        'is_verify'
+        'is_verify',
     ];
 
     /**

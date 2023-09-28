@@ -8,16 +8,16 @@ class StorageHelper
 {
     public static function store($image, $folderPath): string
     {
-        $imageUrl = "";
+        $imageUrl = '';
 
         if ($image) {
-            if (!Storage::exists($folderPath)) {
+            if (! Storage::exists($folderPath)) {
                 Storage::makeDirectory($folderPath);
             }
 
             $path = Storage::putFile($folderPath, $image);
 
-            $imageUrl = env('APP_URL') . (Storage::url($path));
+            $imageUrl = env('APP_URL').(Storage::url($path));
         }
 
         return $imageUrl;
@@ -25,8 +25,8 @@ class StorageHelper
 
     public static function delete($path): void
     {
-        if (Storage::exists('/public' . $path)) {
-            Storage::delete('/public' . $path);
+        if (Storage::exists('/public'.$path)) {
+            Storage::delete('/public'.$path);
         }
     }
 }

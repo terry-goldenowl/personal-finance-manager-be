@@ -3,7 +3,6 @@
 namespace App\Http\Services;
 
 use App\Http\Helpers\FailedData;
-use App\Http\Helpers\ReturnType;
 use App\Http\Helpers\StorageHelper;
 use App\Http\Helpers\SuccessfulData;
 use App\Models\User;
@@ -21,18 +20,21 @@ class UserServices extends BaseService
     public function create(array $data): ?User
     {
         $newUser = $this->model::create($data);
+
         return $newUser;
     }
 
     public function getUserByEmail(string $email): ?User
     {
         $user = $this->model::where('email', $email)->first();
+
         return $user;
     }
 
     public function getUser(int $id): ?User
     {
         $user = $this->model::find($id);
+
         return $user;
     }
 
@@ -82,14 +84,14 @@ class UserServices extends BaseService
                 }
 
                 // STORE AND RETREIVE NEW IMAGE
-                $photoUrl = StorageHelper::store($photo, "/public/images/users");
+                $photoUrl = StorageHelper::store($photo, '/public/images/users');
             }
 
             $data = $photo ? array_merge($data, ['photo' => $photoUrl]) : $data;
 
             $user->update($data);
 
-            return new SuccessfulData("Update user successfully", ['user' => $this->getById($user->id)]);
+            return new SuccessfulData('Update user successfully', ['user' => $this->getById($user->id)]);
         } catch (\Throwable $th) {
             return new FailedData('Failed to update user!');
         }
@@ -105,11 +107,11 @@ class UserServices extends BaseService
         try {
             $user = $this->getById($userId);
 
-            if (!$user) {
+            if (! $user) {
                 return new FailedData('User not found!');
             }
 
-            if (!Hash::check($data['password'], $user->password)) {
+            if (! Hash::check($data['password'], $user->password)) {
                 return new FailedData('Password is not correct!', ['password' => 'Password is not correct!']);
             }
 
@@ -126,7 +128,7 @@ class UserServices extends BaseService
         try {
             $user = $this->getById($id);
 
-            if (!$user) {
+            if (! $user) {
                 return new FailedData('User not found!');
             }
 
@@ -135,6 +137,24 @@ class UserServices extends BaseService
             return new SuccessfulData('Delete user successfully!');
         } catch (\Throwable $th) {
             return new FailedData('Failed to delete user account!');
+        }
+    }
+
+    public function getYears(): object
+    {
+        try {
+            $years = User::selectRaw('YEAR(created_at) as year')
+                ->distinct()
+                ->orderBy('year')
+                ->pluck('year');
+
+            if ($years->count() === 0) {
+                $years = [2023];
+            }
+
+            return new SuccessfulData('Get years of users successfully!', ['years' => $years]);
+        } catch (Exception $error) {
+            return new FailedData('Failed to get users years!');
         }
     }
 }

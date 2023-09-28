@@ -23,7 +23,7 @@ class SendVerficationCodeRequest extends RequestRoot
     public function rules(): array
     {
         return [
-            "email" => ['required', 'string', 'email', 'unique:' . User::class],
+            'email' => ['required', 'string', 'email', 'unique:'.User::class],
         ];
     }
 }
