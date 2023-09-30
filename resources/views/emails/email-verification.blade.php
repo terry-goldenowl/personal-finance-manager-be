@@ -12,9 +12,9 @@
 </head>
 
 <body>
-    <div style="">
+    <div style="padding: 32px 18%; background-color: #dedede; ; border-radius: 10px;">
         <table
-            style="margin-left: auto; margin-right: auto; width: 70%; background-color: #F5EDFF; border-radius: 30px; padding-top: 32px; padding-bottom: 32px;">
+            style="margin-left: auto; margin-right: auto; background-color: #ffffff; border-radius: 10px; padding-top: 32px; padding-bottom: 32px;">
             <thead>
                 <tr>
                     <th>

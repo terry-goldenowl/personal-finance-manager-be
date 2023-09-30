@@ -4,17 +4,37 @@ namespace Tests\Unit\Services;
 
 use App\Http\Services\AuthService;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class AuthServiceTest extends TestCase
 {
+    use RefreshDatabase;
+
     private $authService;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->authService = app(AuthService::class);
+    }
+
+    public function test_register_user_fail_email_exists()
+    {
+        $registerData = [
+            'name' => fake()->name(),
+            'email' => fake()->safeEmail(),
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ];
+
+        Role::create(['name' => 'user', 'guard_name' => 'api']);
+
+        $resultData = $this->authService->register($registerData);
+
+        $this->assertTrue($resultData->status === 'success');
     }
 
     public function test_register_user()
@@ -25,6 +45,8 @@ class AuthServiceTest extends TestCase
             'password' => 'password',
             'password_confirmation' => 'password',
         ];
+
+        Role::create(['name' => 'user', 'guard_name' => 'api']);
 
         $resultData = $this->authService->register($registerData);
 

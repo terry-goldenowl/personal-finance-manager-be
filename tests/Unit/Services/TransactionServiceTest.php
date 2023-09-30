@@ -7,10 +7,13 @@ use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class TransactionServiceTest extends TestCase
 {
+    use RefreshDatabase;
+    
     private $transactionService;
 
     private $user;
