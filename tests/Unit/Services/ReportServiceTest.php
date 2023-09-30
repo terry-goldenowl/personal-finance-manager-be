@@ -5,13 +5,13 @@ namespace Tests\Unit\Services;
 use App\Http\Services\ReportService;
 use App\Models\User;
 use App\Models\Wallet;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ReportServiceTest extends TestCase
 {
-    /**
-     * A basic unit test example.
-     */
+    use RefreshDatabase;
+    
     private $reportService;
 
     private $user;

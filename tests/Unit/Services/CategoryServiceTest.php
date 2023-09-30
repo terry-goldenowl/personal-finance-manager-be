@@ -5,11 +5,14 @@ namespace Tests\Unit\Services;
 use App\Http\Services\CategoryServices;
 use App\Models\Category;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class CategoryServiceTest extends TestCase
 {
+    use RefreshDatabase;
+    
     private $categoryService;
 
     private $user;

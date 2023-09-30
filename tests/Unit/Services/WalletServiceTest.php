@@ -5,10 +5,13 @@ namespace Tests\Unit\Services;
 use App\Http\Services\WalletServices;
 use App\Models\User;
 use App\Models\Wallet;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class WalletServiceTest extends TestCase
 {
+    use RefreshDatabase;
+    
     private $walletService;
 
     private $user;

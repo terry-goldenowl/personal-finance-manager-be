@@ -13,9 +13,9 @@
 
 <body>
 
-    <div style="">
+    <div style="padding: 32px 18%; background-color: #dedede; border-radius: 10px;">
         <table
-            style="margin-left: auto; margin-right: auto; width: 70%; background-color: #F5EDFF; border-radius: 30px; padding-top: 32px; padding-bottom: 32px;">
+            style="margin-left: auto; margin-right: auto; background-color: #ffffff; border-radius: 10px; padding: 32px 48px;">
             <thead>
                 <tr>
                     <th>
@@ -32,10 +32,18 @@
                 </tr>
                 <tr>
                     <td>
-                        <p style="font-size: 20px; text-align: center;">Your pasword reset link is: <a
-                                style="font-size: 20; color: purple; font-weight: bold"
-                                href="{{ $link }}">{{ $link }}</a>
+                        <p style="font-weight: bold; font-size: 18px">Hello!</p>
+                        <p style="font-size: 18px; margin-bottom: 16px">Click this button to reset
+                            password: {{ ' ' }}
+                            <a style="padding: 6px 16px; font-size: 15px; color: #ffffff; background-color: #a023f4; font-weight: bold; border-radius: 4px; text-decoration: none;"
+                                href="{{ $link }}">Reset password</a>
                         </p>
+
+                        <div style="height: 1px; background-color: #c9c9c9; margin-bottom: 12px;"></div>
+
+                        <p style="color: #8d8d8d; font-size: 13px;">If you have any trouble clicking reset password
+                            button, copy and paste
+                            the URL below into your web browser: {{ $link }}</p>
                     </td>
                 </tr>
             </tbody>
