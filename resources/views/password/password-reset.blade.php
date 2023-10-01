@@ -15,7 +15,7 @@
 
     <div style="padding: 32px 18%; background-color: #dedede; border-radius: 10px;">
         <table
-            style="margin-left: auto; margin-right: auto; background-color: #ffffff; border-radius: 10px; padding: 32px 48px;">
+            style="margin-left: auto; margin-right: auto; width: 100%; background-color: #ffffff; border-radius: 10px; padding: 32px 48px;">
             <thead>
                 <tr>
                     <th>
