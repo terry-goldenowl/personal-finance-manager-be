@@ -139,6 +139,14 @@ class TransactionServices extends BaseService
                 if (! $this->categoryService->checkExistsById($data['category_id'])) {
                     return new FailedData('Category not found!');
                 }
+
+                $category = $this->categoryService->getById($data['category_id']);
+
+                if ($category && $category->default == true) {
+                    $newCategory = $this->categoryService->createBasedOnDefault($user->id, $category);
+
+                    $data['category_id'] = $newCategory->id;
+                }
             }
 
             if (isset($data['wallet_id'])) {
