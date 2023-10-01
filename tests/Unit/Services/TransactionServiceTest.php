@@ -7,13 +7,15 @@ use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class TransactionServiceTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     private $transactionService;
 
     private $user;
@@ -21,6 +23,9 @@ class TransactionServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Role::create(['name' => 'admin', 'guard_name' => 'api']);
+        Role::create(['name' => 'user', 'guard_name' => 'api']);
+
         $this->user = User::factory()->create();
         $this->user->assignRole('user');
         $this->transactionService = app(TransactionServices::class);
@@ -31,15 +36,23 @@ class TransactionServiceTest extends TestCase
         $maxId = Category::select('id')->max('id');
 
         $transactionData = ['category_id' => $maxId + 1];
+
         $resultData = $this->transactionService->create($this->user, $transactionData);
         $this->assertEquals($resultData->message, 'Category not found!');
     }
 
     public function test_create_fail_wallet_not_found()
     {
+        $category = Category::factory()->create();
+        $category->update(['user_id' => $this->user->id]);
+
         $maxId = Wallet::select('id')->max('id');
 
-        $transactionData = ['wallet_id' => $maxId + 1];
+        $transactionData = [
+            'category_id' => $category->id,
+            'wallet_id' => $maxId + 1,
+        ];
+
         $resultData = $this->transactionService->create($this->user, $transactionData);
         $this->assertEquals($resultData->message, 'Wallet not found!');
     }
@@ -97,11 +110,31 @@ class TransactionServiceTest extends TestCase
         $this->assertEquals($resultData->message, 'Transaction not found!');
     }
 
+    private function get_sample_transaction()
+    {
+        $wallet = Wallet::factory()->create();
+        $wallet->update(['user_id' => $this->user->id]);
+
+        $category = Category::factory()->create();
+        $category->update(['user_id' => $this->user->id]);
+
+        $transaction = Transaction::create([
+            'title' => fake()->words(fake()->numberBetween(4, 10), true),
+            'date' => Carbon::now(),
+            'user_id' => $this->user->id,
+            'amount' => fake()->numberBetween(1000, 300000),
+            'wallet_id' => $wallet->id,
+            'category_id' => $category->id,
+        ]);
+
+        return $transaction;
+    }
+
     public function test_update_fail_category_not_found()
     {
+        $transaction = $this->get_sample_transaction();
+
         $maxId = Category::select('id')->max('id');
-        $transaction = Transaction::factory()->create();
-        $transaction->update(['user_id' => $this->user->id]);
 
         $resultData = $this->transactionService->update($this->user, ['category_id' => $maxId + 1], $transaction->id);
         $this->assertEquals($resultData->message, 'Category not found!');
@@ -109,18 +142,20 @@ class TransactionServiceTest extends TestCase
 
     public function test_update_fail_wallet_not_found()
     {
-        $maxId = Wallet::select('id')->max('id');
-        $transaction = Transaction::factory()->create();
-        $transaction->update(['user_id' => $this->user->id]);
+        $transaction = $this->get_sample_transaction();
 
-        $resultData = $this->transactionService->update($this->user, ['wallet_id' => $maxId + 1], $transaction->id);
+        $maxId = Wallet::select('id')->max('id');
+
+        $resultData = $this->transactionService->update($this->user, [
+            'wallet_id' => $maxId + 1,
+        ], $transaction->id);
+
         $this->assertEquals($resultData->message, 'Wallet not found!');
     }
 
     public function test_update()
     {
-        $transaction = Transaction::factory()->create();
-        $transaction->update(['user_id' => $this->user->id]);
+        $transaction = $this->get_sample_transaction();
 
         $data = [
             'amount' => fake()->randomFloat(0, 1000, 1000000),
@@ -143,9 +178,9 @@ class TransactionServiceTest extends TestCase
 
     public function test_delete()
     {
-        $categoryToDelete = Transaction::factory()->create();
+        $transaction = $this->get_sample_transaction();
 
-        $resultData = $this->transactionService->delete($categoryToDelete->id);
+        $resultData = $this->transactionService->delete($transaction->id);
         $this->assertTrue($resultData->status === 'success');
     }
 

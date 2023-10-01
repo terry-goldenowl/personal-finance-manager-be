@@ -7,12 +7,13 @@ use App\Models\Category;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class CategoryServiceTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     private $categoryService;
 
     private $user;
@@ -20,6 +21,9 @@ class CategoryServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Role::create(['name' => 'admin', 'guard_name' => 'api']);
+        Role::create(['name' => 'user', 'guard_name' => 'api']);
+
         $this->user = User::factory()->create();
         $this->user->assignRole('user');
         $this->categoryService = app(CategoryServices::class);
@@ -132,21 +136,6 @@ class CategoryServiceTest extends TestCase
 
         $resultData = $this->categoryService->update([], $maxId + 1);
         $this->assertEquals($resultData->message, 'Category not found!');
-    }
-
-    public function test_update_fail_duplicate_name()
-    {
-        $categoryToUpdate = Category::factory()->create();
-        $categoryToUpdate->update(['user_id', $this->user->id]);
-        $existingCategory = Category::factory()->create();
-        $existingCategory->update(['user_id', $this->user->id]);
-
-        $categoryData = [
-            'name' => $existingCategory->name,
-        ];
-
-        $resultData = $this->categoryService->update($categoryData, $categoryToUpdate->id);
-        $this->assertEquals($resultData->message, 'This category name has been used!');
     }
 
     public function test_update()

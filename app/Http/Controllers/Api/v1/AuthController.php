@@ -19,7 +19,7 @@ class AuthController extends Controller
 
     public function register(RegisterUserRequest $request)
     {
-        $returnData = $this->authService->register($request->validated());
+        $returnData = $this->authService->register($request->all());
 
         return (new MyResponse($returnData))->get();
     }
@@ -40,14 +40,7 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
-        $returnData = $this->authService->login($request->validated());
-
-        return (new MyResponse($returnData))->get();
-    }
-
-    public function resetPassword(ResetPasswordRequest $request)
-    {
-        $returnData = $this->authService->resetPassword($request->validated());
+        $returnData = $this->authService->login($request->all());
 
         return (new MyResponse($returnData))->get();
     }
@@ -55,6 +48,13 @@ class AuthController extends Controller
     public function forgetPassword(Request $request)
     {
         $returnData = $this->authService->forgetPassword($request->email);
+
+        return (new MyResponse($returnData))->get();
+    }
+
+    public function resetPassword(ResetPasswordRequest $request)
+    {
+        $returnData = $this->authService->resetPassword($request->all());
 
         return (new MyResponse($returnData))->get();
     }

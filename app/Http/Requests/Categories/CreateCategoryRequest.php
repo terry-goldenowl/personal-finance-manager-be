@@ -24,7 +24,7 @@ class CreateCategoryRequest extends RequestRoot
     {
         return [
             'name' => 'string|required',
-            'image' => 'required|file|mimes:jpeg,png,gif|max:2048',
+            'image' => 'file|required|mimes:jpeg,png,gif',
             'type' => 'string|required',
         ];
     }

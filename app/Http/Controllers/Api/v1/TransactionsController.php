@@ -17,7 +17,7 @@ class TransactionsController extends Controller
 
     public function create(CreateTransactionRequest $request)
     {
-        $returnData = $this->transactionServices->create($request->user(), $request->validated());
+        $returnData = $this->transactionServices->create($request->user(), $request->all());
 
         return (new MyResponse($returnData))->get();
     }
@@ -45,7 +45,7 @@ class TransactionsController extends Controller
 
     public function update(UpdateTransactionRequest $request, int $id)
     {
-        $returnData = $this->transactionServices->update($request->user(), $request->validated(), $id);
+        $returnData = $this->transactionServices->update($request->user(), $request->all(), $id);
 
         return (new MyResponse($returnData))->get();
     }

@@ -73,7 +73,6 @@ class TransactionServices extends BaseService
             $category = isset($inputs['category']) ? $inputs['category'] : null;
             $transactionType = isset($inputs['transaction_type']) ? $inputs['transaction_type'] : 'total';
             $search = isset($inputs['search']) ? $inputs['search'] : '';
-            $page = isset($inputs['page']) ? $inputs['page'] : null;
 
             $query = $user->transactions();
 
@@ -105,11 +104,6 @@ class TransactionServices extends BaseService
 
             if (strlen($search) > 0) {
                 $query->where('title', 'LIKE', '%'.($search).'%')->orWhere('description', 'LIKE', '%'.$search.'%');
-            }
-
-            if ($page) {
-                $transactionsPerPage = 10;
-                $query->skip($transactionsPerPage * ($page - 1))->take($transactionsPerPage);
             }
 
             $transactions = $query->orderBy('date', 'desc')->with('category')->get();

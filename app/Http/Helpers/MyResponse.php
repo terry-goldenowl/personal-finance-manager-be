@@ -4,9 +4,9 @@ namespace App\Http\Helpers;
 
 class MyResponse
 {
-    private int $httpCode;
+    public int $httpCode;
 
-    private BaseData $data;
+    public BaseData $data;
 
     public function __construct(
         BaseData $data,

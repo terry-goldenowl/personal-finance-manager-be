@@ -75,30 +75,37 @@ class CategoryPlanService extends BaseService
 
             if ($categoryId && $plans->count() > 0) {
                 $category = $this->categoryService->getById($categoryId);
+
                 if ($category->default == 1) {
                     $category = $this->categoryService->getWithSameNameOfUser($user->id, $categoryId, $category->name);
                 }
 
-                $plans = $plans->where('category_id', $category->id);
+                if ($category) {
+                    $plans = $plans->where('category_id', $category->id);
+                } else {
+                    $plans = [];
+                }
             }
 
-            $plans = $plans->get();
+            if ($plans != []) {
+                $plans = $plans->get();
 
-            if ($withReport) {
-                $report = app(ReportService::class)->get($user, [
-                    'year' => $year, 'month' => $month, 'wallet' => $walletId, 'report_type' => 'categories',
-                ]);
+                if ($withReport) {
+                    $report = app(ReportService::class)->get($user, [
+                        'year' => $year, 'month' => $month, 'wallet' => $walletId, 'report_type' => 'categories',
+                    ]);
 
-                $plans = $plans->map(function ($plan) use ($report) {
+                    $plans = $plans->map(function ($plan) use ($report) {
 
-                    if (isset($report->getData()['reports'][$plan->category_id.''])) {
-                        $plan = (object) array_merge($plan->toArray(), ['actual' => $report->getData()['reports'][$plan->category_id.'']['amount']]);
-                    } else {
-                        $plan = (object) array_merge($plan->toArray(), ['actual' => 0]);
-                    }
+                        if (isset($report->getData()['reports'][$plan->category_id.''])) {
+                            $plan = (object) array_merge($plan->toArray(), ['actual' => $report->getData()['reports'][$plan->category_id.'']['amount']]);
+                        } else {
+                            $plan = (object) array_merge($plan->toArray(), ['actual' => 0]);
+                        }
 
-                    return $plan;
-                });
+                        return $plan;
+                    });
+                }
             }
 
             return new SuccessfulData('Get plans successfully', ['plans' => $plans]);

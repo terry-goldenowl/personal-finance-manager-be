@@ -6,12 +6,13 @@ use App\Http\Services\WalletServices;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class WalletServiceTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     private $walletService;
 
     private $user;
@@ -19,7 +20,11 @@ class WalletServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Role::create(['name' => 'admin', 'guard_name' => 'api']);
+        Role::create(['name' => 'user', 'guard_name' => 'api']);
+
         $this->user = User::factory()->create();
+
         $this->user->assignRole('user');
         $this->walletService = app(WalletServices::class);
     }
@@ -126,7 +131,7 @@ class WalletServiceTest extends TestCase
     public function test_delete()
     {
         $categoryToDelete = Wallet::factory()->create();
-        $categoryToDelete->update(['user_id' => $categoryToDelete->id]);
+        $categoryToDelete->update(['user_id' => $this->user->id]);
 
         $resultData = $this->walletService->delete($categoryToDelete->id);
         $this->assertTrue($resultData->status === 'success');

@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -36,7 +35,7 @@ class DailyTransactionReminder extends Notification
     {
         return (new MailMessage)
             ->line('Don\'t forget to add your transactions for today!')
-            ->action('Add Transactions', env('APP_FE_URL') . '/transactions')
+            ->action('Add Transactions', env('APP_FE_URL').'/transactions')
             ->line('Thank you for using Money Master!');
     }
 

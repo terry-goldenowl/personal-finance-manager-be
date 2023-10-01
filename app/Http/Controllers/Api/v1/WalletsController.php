@@ -17,7 +17,7 @@ class WalletsController extends Controller
 
     public function create(CreateWalletRequest $request)
     {
-        $returnData = $this->walletServices->create($request->user(), $request->validated());
+        $returnData = $this->walletServices->create($request->user(), $request->all());
 
         return (new MyResponse($returnData))->get();
     }
@@ -31,7 +31,7 @@ class WalletsController extends Controller
 
     public function update(UpdateWalletRequest $request, int $id)
     {
-        $returnData = $this->walletServices->update($request->validated(), $id);
+        $returnData = $this->walletServices->update($request->all(), $id);
 
         return (new MyResponse($returnData))->get();
     }
