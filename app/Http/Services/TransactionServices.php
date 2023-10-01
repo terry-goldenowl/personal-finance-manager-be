@@ -143,9 +143,14 @@ class TransactionServices extends BaseService
                 $category = $this->categoryService->getById($data['category_id']);
 
                 if ($category && $category->default == true) {
-                    $newCategory = $this->categoryService->createBasedOnDefault($user->id, $category);
+                    $existingUserCategory = $this->categoryService->getWithSameNameOfUser($user->id, $category->id, $category->name);
 
-                    $data['category_id'] = $newCategory->id;
+                    if ($existingUserCategory) {
+                        $data['category_id'] = $existingUserCategory->id;
+                    } else {
+                        $newCategory = $this->categoryService->createBasedOnDefault($user->id, $category);
+                        $data['category_id'] = $newCategory->id;
+                    }
                 }
             }
 
