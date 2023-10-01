@@ -155,7 +155,7 @@ class AuthService extends BaseService
 
             $resetLink = config('constants.app_fe_url').'/reset-password/'.$token;
 
-            Mail::to($user)->queue(new PasswordReset($resetLink));
+            Mail::to($email)->queue(new PasswordReset($resetLink));
 
             return new SuccessfulData('Password reset link was sent!');
         } catch (Exception $error) {

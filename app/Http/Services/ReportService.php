@@ -15,7 +15,6 @@ class ReportService
 {
     public function get(User $user, array $inputs): object
     {
-        // Query by: date, month, year, category, wallet, report type (total/income/expense)
         try {
             $month = isset($inputs['month']) ? $inputs['month'] : null;
             $year = isset($inputs['year']) ? $inputs['year'] : null;

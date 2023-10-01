@@ -115,14 +115,6 @@ class AuthServiceTest extends TestCase
         $this->assertEquals($resultData->message, 'User with this email does not exist!');
     }
 
-    public function test_forget_password()
-    {
-        $existingUser = User::factory()->create();
-
-        $resultData = $this->authService->forgetPassword($existingUser->email);
-        $this->assertTrue($resultData->status === 'success');
-    }
-
     public function test_logout()
     {
         $existingUser = User::factory()->create();

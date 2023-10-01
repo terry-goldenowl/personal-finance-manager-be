@@ -24,7 +24,7 @@ class UpdateCategoryRequest extends RequestRoot
     {
         return [
             'name' => 'nullable|string',
-            'image' => 'nullable|file|mimes:jpeg,png,gif|max:2048',
+            'image' => 'nullable|file|mimes:jpeg,jpg,png,gif|max:2048',
             'type' => 'nullable|string',
         ];
     }

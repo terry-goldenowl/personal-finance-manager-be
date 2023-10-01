@@ -6,12 +6,13 @@ use App\Http\Services\ReportService;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ReportServiceTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     private $reportService;
 
     private $user;
@@ -19,7 +20,11 @@ class ReportServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Role::create(['name' => 'admin', 'guard_name' => 'api']);
+        Role::create(['name' => 'user', 'guard_name' => 'api']);
+
         $this->user = User::factory()->create();
+
         $this->user->assignRole('user');
         $this->reportService = app(ReportService::class);
     }
