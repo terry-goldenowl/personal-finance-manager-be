@@ -107,7 +107,8 @@ class CategoryServices extends BaseService
 
                 return true;
             })->values();
-
+            
+            
             if ($default == 'false') {
                 $categories = $categories->filter(function ($category) {
                     return $category->user_id > 0;
@@ -123,12 +124,12 @@ class CategoryServices extends BaseService
                     return $category->type == $type;
                 })->values();
             }
-
+            
             if ($withPlan && $month && $year && $walletId) {
                 $categories = $categories->map(function ($category) use ($user, $month, $year, $walletId) {
                     $plan = app(CategoryPlanService::class)->get($user, ['month' => $month, 'year' => $year, 'category_id' => $category->id, 'wallet_id' => $walletId]);
-
-                    if ($plan instanceof SuccessfulData) {
+                    
+                    if ($plan instanceof SuccessfulData && $plan->getData()['plans']->count() > 0) {
                         $category = (object) array_merge($category->toArray(), ['plan' => $plan->getData()['plans']->first()]);
                     } else {
                         $category = (object) array_merge($category->toArray(), ['plan' => null]);
