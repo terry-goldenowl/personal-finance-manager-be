@@ -30,7 +30,7 @@ class CategoryServices extends BaseService
     public function create(User $user, array $data): object
     {
         try {
-            if (! in_array($data['type'], ['incomes', 'expenses'])) {
+            if (!in_array($data['type'], ['incomes', 'expenses'])) {
                 return new FailedData('Invalid type', ['type' => 'Type is invalid! Available types: [incomes, expenses]']);
             }
 
@@ -86,9 +86,9 @@ class CategoryServices extends BaseService
                 ->orWhereNull('user_id')->select('name', DB::raw('count(*) as count'))->groupBy('name')->distinct()->get()->toArray();
 
             $categories = $categories->where('user_id', $user->id)->orWhereNull('user_id')->get()->filter(function ($category) use ($countNames, $default) {
-                if (! is_null($default)) {
+                if (!is_null($default)) {
                     if ($default == true) {
-                        $includeDefault = ! is_null($category->user_id);
+                        $includeDefault = !is_null($category->user_id);
                     } else {
                         $includeDefault = is_null($category->user_id);
                     }
@@ -107,6 +107,7 @@ class CategoryServices extends BaseService
 
                 return true;
             })->values();
+
 
             if ($default == 'false') {
                 $categories = $categories->filter(function ($category) {
@@ -128,7 +129,7 @@ class CategoryServices extends BaseService
                 $categories = $categories->map(function ($category) use ($user, $month, $year, $walletId) {
                     $plan = app(CategoryPlanService::class)->get($user, ['month' => $month, 'year' => $year, 'category_id' => $category->id, 'wallet_id' => $walletId]);
 
-                    if ($plan instanceof SuccessfulData) {
+                    if ($plan instanceof SuccessfulData && count($plan->getData()['plans']) > 0) {
                         $category = (object) array_merge($category->toArray(), ['plan' => $plan->getData()['plans']->first()]);
                     } else {
                         $category = (object) array_merge($category->toArray(), ['plan' => null]);
@@ -156,7 +157,7 @@ class CategoryServices extends BaseService
             }
 
             if ($search) {
-                $categories->where('name', 'LIKE', '%'.$search.'%');
+                $categories->where('name', 'LIKE', '%' . $search . '%');
             }
 
             $categories = $categories->get()->map(function ($category) {
@@ -199,7 +200,7 @@ class CategoryServices extends BaseService
     {
         try {
             $category = $this->getById($id);
-            if (! $category) {
+            if (!$category) {
                 return new FailedData('Category not found!', ['error' => 'category']);
             }
 
@@ -218,7 +219,7 @@ class CategoryServices extends BaseService
             $data = $image ? array_merge($data, ['image' => $imageUrl]) : $data;
             $updated = $category->update($data);
 
-            if (! (bool) $updated) {
+            if (!(bool) $updated) {
                 return new FailedData('Update fails or category not found!');
             }
 
@@ -233,7 +234,7 @@ class CategoryServices extends BaseService
         try {
             $category = $this->getById($id);
 
-            if (! $category) {
+            if (!$category) {
                 return new FailedData('Category not found!');
             }
 
@@ -270,7 +271,7 @@ class CategoryServices extends BaseService
         try {
             $category = $this->getById($id);
 
-            if (! $category) {
+            if (!$category) {
                 return new FailedData('Category not found!');
             }
 
@@ -280,7 +281,7 @@ class CategoryServices extends BaseService
             }
 
             $deleted = $this->model::destroy($id);
-            if (! $deleted) {
+            if (!$deleted) {
                 return new FailedData('Delete fails or category not found!');
             }
 
