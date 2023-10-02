@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('transactions:reminder')->dailyAt('23:45'); // Adjust the time as per your needs.
+        $schedule->command('transactions:reminder')->dailyAt('11:13')->timezone('Asia/Ho_Chi_Minh'); // Adjust the time as per your needs.
     }
 
     /**
@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

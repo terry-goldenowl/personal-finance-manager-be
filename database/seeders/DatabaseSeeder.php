@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
         });
         Wallet::factory(60)->create();
         Category::factory(70)->create();
-        Transaction::factory(600)->create();
+        Transaction::factory(10000)->create();
         MonthPlan::factory(100)->create();
         CategoryPlan::factory(300)->create();
     }
