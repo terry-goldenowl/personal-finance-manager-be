@@ -6,6 +6,7 @@ use App\Http\Helpers\FailedData;
 use App\Http\Helpers\StorageHelper;
 use App\Http\Helpers\SuccessfulData;
 use App\Models\Category;
+use App\Models\CategoryPlan;
 use App\Models\Transaction;
 use App\Models\User;
 use Exception;
@@ -67,19 +68,7 @@ class CategoryServices extends BaseService
             $withPlan = isset($inputs['with_plan']) ? $inputs['with_plan'] : null;
             $walletId = isset($inputs['wallet_id']) ? $inputs['wallet_id'] : null;
 
-            $categories = $this->model::query();
-
-            if ($ingoreExists && $month && $year) {
-                $categories->where('user_id', $user->id)
-                    ->orWhereNull('user_id')
-                    ->whereNotIn('id', function ($query) use ($month, $year, $user) {
-                        $query->select('category_id')
-                            ->from('category_plans')
-                            ->where('month', $month)
-                            ->where('year', $year)
-                            ->where('user_id', $user->id);
-                    });
-            }
+            $categories = $this->model::query()->withCount('transactions');
 
             $categoriesTemp = clone $categories;
             $countNames = $categoriesTemp->where('user_id', $user->id)
@@ -125,6 +114,21 @@ class CategoryServices extends BaseService
                 })->values();
             }
 
+            // Get categories that are not used for any category plans
+            if ($ingoreExists && $month && $year) {
+                $existingNames = CategoryPlan::join('categories', 'categories.id', '=', 'category_plans.category_id')
+                    ->select('categories.name')
+                    ->distinct()
+                    ->where('month', $month)
+                    ->where('year', $year)
+                    ->where('categories.user_id', $user->id)->get()->pluck('name');
+
+                $categories = $categories->filter(function ($category) use ($existingNames) {
+                    return !in_array($category->name, $existingNames->toArray());
+                })->values();
+            }
+
+            // Get plan of categories (if exists)
             if ($withPlan && $month && $year && $walletId) {
                 $categories = $categories->map(function ($category) use ($user, $month, $year, $walletId) {
                     $plan = app(CategoryPlanService::class)->get($user, ['month' => $month, 'year' => $year, 'category_id' => $category->id, 'wallet_id' => $walletId]);
@@ -138,6 +142,9 @@ class CategoryServices extends BaseService
                     return $category;
                 });
             }
+
+            // Sort categories by transaction count
+            $categories = $categories->sortByDesc('transactions_count')->values();
 
             return new SuccessfulData('Get categories successfully', ['categories' => $categories]);
         } catch (Exception $error) {
