@@ -7,7 +7,6 @@ use App\Http\Helpers\SuccessfulData;
 use App\Mail\EmailVerification;
 use App\Mail\PasswordReset;
 use App\Models\User;
-use DebugBar\DebugBar;
 use Exception;
 use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Support\Facades\Hash;

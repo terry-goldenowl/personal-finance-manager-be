@@ -223,11 +223,9 @@ class CategoryServices extends BaseService
             }
 
             $data = $image ? array_merge($data, ['image' => $imageUrl]) : $data;
-            $updated = $category->update($data);
+            $this->updateBasedOnDefault($category->name, $data);
 
-            if (! (bool) $updated) {
-                return new FailedData('Update fails or category not found!');
-            }
+            $category->update($data);
 
             return new SuccessfulData('Update category successfully!');
         } catch (Exception $error) {
@@ -263,7 +261,7 @@ class CategoryServices extends BaseService
                     StorageHelper::delete($imagePath);
                 }
 
-                $deleted = $this->model::destroy($id);
+                $this->model::destroy($id);
             }
 
             return new SuccessfulData('Delete category successfully!');
@@ -326,5 +324,10 @@ class CategoryServices extends BaseService
             'user_id' => $userId,
             'default' => false,
         ]);
+    }
+
+    public function updateBasedOnDefault(string $oldCategoryName, array $data): void
+    {
+        Category::where('name', $oldCategoryName)->where('default', 0)->update($data);
     }
 }

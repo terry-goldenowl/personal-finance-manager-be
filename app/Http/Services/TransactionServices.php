@@ -27,11 +27,11 @@ class TransactionServices extends BaseService
     public function create(User $user, array $data): object
     {
         try {
-            if (!$this->categoryService->checkExistsById($data['category_id'])) {
+            if (! $this->categoryService->checkExistsById($data['category_id'])) {
                 return new FailedData('Category not found!');
             }
 
-            if (!$this->walletService->checkExistsById($data['wallet_id'])) {
+            if (! $this->walletService->checkExistsById($data['wallet_id'])) {
                 return new FailedData('Wallet not found!');
             }
 
@@ -103,7 +103,7 @@ class TransactionServices extends BaseService
             }
 
             if (strlen($search) > 0) {
-                $query->where('title', 'LIKE', '%' . ($search) . '%')->orWhere('description', 'LIKE', '%' . $search . '%');
+                $query->where('title', 'LIKE', '%'.($search).'%')->orWhere('description', 'LIKE', '%'.$search.'%');
             }
 
             $transactions = $query->orderBy('date', 'desc')->with('category')->get();
@@ -131,12 +131,12 @@ class TransactionServices extends BaseService
     {
         try {
             $transaction = $this->getById($id);
-            if (!$transaction) {
+            if (! $transaction) {
                 return new FailedData('Transaction not found!');
             }
 
             if (isset($data['category_id'])) {
-                if (!$this->categoryService->checkExistsById($data['category_id'])) {
+                if (! $this->categoryService->checkExistsById($data['category_id'])) {
                     return new FailedData('Category not found!');
                 }
 
@@ -155,7 +155,7 @@ class TransactionServices extends BaseService
             }
 
             if (isset($data['wallet_id'])) {
-                if (!$this->walletService->checkExistsById($data['wallet_id'])) {
+                if (! $this->walletService->checkExistsById($data['wallet_id'])) {
                     return new FailedData('Wallet not found!');
                 }
             }
@@ -175,17 +175,13 @@ class TransactionServices extends BaseService
             }
 
             if (isset($data['is_image_cleared'])) {
-                $imageUrl = "";
+                $imageUrl = '';
             }
 
             $transactionData = isset($imageUrl) ? array_merge($data, ['user_id' => $user->id, 'image' => $imageUrl])
                 : array_merge($data, ['user_id' => $user->id]);
 
-            $updated = $transaction->update($transactionData);
-
-            if (!$updated) {
-                return new FailedData('Update transaction failed!');
-            }
+            $transaction->update($transactionData);
 
             return new SuccessfulData('Update transaction successfully!', $data);
         } catch (Exception $error) {
@@ -197,7 +193,7 @@ class TransactionServices extends BaseService
     {
         try {
             $transaction = $this->getById($id);
-            if (!$transaction) {
+            if (! $transaction) {
                 return new FailedData('Transaction not found!');
             }
 
@@ -207,7 +203,7 @@ class TransactionServices extends BaseService
             }
 
             $deleted = $this->model::destroy($id);
-            if (!$deleted) {
+            if (! $deleted) {
                 return new FailedData('Can not delete transaction!');
             }
 
