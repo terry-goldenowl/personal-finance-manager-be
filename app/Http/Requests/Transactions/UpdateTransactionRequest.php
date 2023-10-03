@@ -30,6 +30,7 @@ class UpdateTransactionRequest extends RequestRoot
             'date' => 'nullable|date',
             'description' => 'nullable|string',
             'image' => 'nullable|file|mimes:jpeg,jpg,png,gif|max:2048',
+            'is_image_cleared' => 'nullable|bool'
         ];
     }
 }
