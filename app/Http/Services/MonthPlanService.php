@@ -22,7 +22,7 @@ class MonthPlanService extends BaseService
     {
         try {
 
-            if (!$this->walletService->checkExistsById($data['wallet_id'])) {
+            if (! $this->walletService->checkExistsById($data['wallet_id'])) {
                 return new FailedData('Wallet not found!');
             }
 
@@ -80,7 +80,7 @@ class MonthPlanService extends BaseService
     {
         try {
             $plan = $this->getById($id);
-            if (!$plan) {
+            if (! $plan) {
                 return new FailedData('Month plan not found!');
             }
 
@@ -88,7 +88,7 @@ class MonthPlanService extends BaseService
 
             $updated = $plan->update($planData);
 
-            if (!$updated) {
+            if (! $updated) {
                 return new FailedData('Plan is not created!');
             }
 
@@ -102,7 +102,7 @@ class MonthPlanService extends BaseService
     {
         try {
             $deleted = $this->model::destroy($id);
-            if (!$deleted) {
+            if (! $deleted) {
                 return new FailedData('Delete fails or plan not found!');
             }
 
