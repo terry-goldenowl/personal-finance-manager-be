@@ -171,11 +171,14 @@ class TransactionServices extends BaseService
             }
 
             if ($image) {
-                // STORE AND RETREIVE NEW IMAGE
                 $imageUrl = StorageHelper::store($image, '/public/images/transactions');
             }
 
-            $transactionData = $image ? array_merge($data, ['user_id' => $user->id, 'image' => $imageUrl])
+            if (isset($data['is_image_cleared'])) {
+                $imageUrl = "";
+            }
+
+            $transactionData = isset($imageUrl) ? array_merge($data, ['user_id' => $user->id, 'image' => $imageUrl])
                 : array_merge($data, ['user_id' => $user->id]);
 
             $updated = $transaction->update($transactionData);
