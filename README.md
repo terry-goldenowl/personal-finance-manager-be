@@ -150,8 +150,7 @@ This section should list any major frameworks/libraries used to bootstrap your p
 ![image](https://github.com/terry-goldenowl/personal-finance-manager-be/assets/138744655/9f09766f-bcca-4fe7-acf0-5297010f8a80)
 
 ### DB Diagram
-[![](https://mermaid.ink/img/pako:eNqN0dEKgjAUBuBXOZxre4HdjZIKTEMXEQxiuFNKmTHdRczePaUiMot2ez7O_7PjMC01IUMyk1ztjSrkCdq3SvwYmmY0ahyseRD4gkGmqt6wdDDmwp9G8ebLWMQ8TPhYzKOQQWpI1fSJFlEoZttlwH-YZ84Au_cbSAQGEm1FGnalkTikX9F_4LcOg_4p_i3T978T0MOCTKFy3R7MdRsk1hkVJLGjWplDx66tU7Yuk8spRVYbSx7as27_63FiZDt1rOh6AzyDmkE?type=png)](https://mermaid.live/edit#pako:eNqN0dEKgjAUBuBXOZxre4HdjZIKTEMXEQxiuFNKmTHdRczePaUiMot2ez7O_7PjMC01IUMyk1ztjSrkCdq3SvwYmmY0ahyseRD4gkGmqt6wdDDmwp9G8ebLWMQ8TPhYzKOQQWpI1fSJFlEoZttlwH-YZ84Au_cbSAQGEm1FGnalkTikX9F_4LcOg_4p_i3T978T0MOCTKFy3R7MdRsk1hkVJLGjWplDx66tU7Yuk8spRVYbSx7as27_63FiZDt1rOh6AzyDmkE)
-
+![mermaid-diagram-2023-10-09-181023](https://github.com/terry-goldenowl/personal-finance-manager-be/assets/138744655/235d0e74-5e73-4a6f-bf20-82449b0499f3)
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -211,6 +210,7 @@ You can now access the server at http://localhost:8000
   * Make and manage plans for month and categories of a month
   * See reports
   * Make manage your own categories
+  * Make and manage goals and add additions to goal
 
 * Admin role:
   * See some statistics
