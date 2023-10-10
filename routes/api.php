@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CategoriesController;
 use App\Http\Controllers\Api\v1\CategoryPlansController;
+use App\Http\Controllers\Api\v1\GoalAdditionsController;
+use App\Http\Controllers\Api\v1\GoalsController;
 use App\Http\Controllers\Api\v1\MonthPlansController;
 use App\Http\Controllers\Api\v1\ReportsController;
 use App\Http\Controllers\Api\v1\TransactionsController;
@@ -70,6 +72,19 @@ Route::prefix('v1')->group(function () {
             Route::get('/plans/category/years', [CategoryPlansController::class, 'getYears'])->name('get-category-plans-years');
             Route::patch('/plans/category/{id}', [CategoryPlansController::class, 'update'])->name('update-category-plan');
             Route::delete('/plans/category/{id}', [CategoryPlansController::class, 'delete'])->name('delete-category-plan');
+
+            // Goals
+            Route::post('/goals', [GoalsController::class, 'create'])->name('create-goal');
+            Route::get('/goals', [GoalsController::class, 'get'])->name('get-goals');
+            Route::get('/goals/transferable', [GoalsController::class, 'getTransferable'])->name('get-transferable-goals');
+            Route::post('/goals/{id}/transfer', [GoalsController::class, 'transferToAnotherGoal'])->name('transfer-to-another-goal');
+            Route::post('/goals/{id}/return', [GoalsController::class, 'returnBackToWallet'])->name('return-back-to-wallet');
+            Route::patch('/goals/{id}', [GoalsController::class, 'update'])->name('update-goal');
+            Route::delete('/goals/{id}', [GoalsController::class, 'delete'])->name('delete-goal');
+
+            // Goal additions
+            Route::post('/goals/{goalId}/additions', [GoalAdditionsController::class, 'create'])->name('create-goal-addition');
+            Route::get('/goals/{goalId}/additions', [GoalAdditionsController::class, 'get'])->name('get-goal-addition');
 
             // Users
             Route::delete('/users', [UserController::class, 'deleteUser'])->name('delete-user');

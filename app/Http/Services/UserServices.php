@@ -38,7 +38,7 @@ class UserServices extends BaseService
         return $user;
     }
 
-    public function getUsers(array $inputs): object
+    public function getUsers(): object
     {
         try {
             $users = $this->model::withCount('transactions')->get();

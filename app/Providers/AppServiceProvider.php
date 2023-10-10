@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Http\Services\GoalAdditionService;
+use App\Http\Services\GoalService;
 use App\Services\AuthService;
 use App\Services\CategoryPlanService;
 use App\Services\CategoryServices;
@@ -25,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MonthPlanService::class);
         $this->app->bind(CategoryPlanService::class);
         $this->app->bind(TransactionServices::class);
+        $this->app->bind(GoalService::class);
+        $this->app->bind(GoalAdditionService::class);
     }
 
     /**

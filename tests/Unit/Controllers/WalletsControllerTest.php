@@ -99,8 +99,8 @@ class WalletsControllerTest extends TestCase
 
     public function test_delete()
     {
-        $category = Wallet::factory()->create();
-        $category->update(['user_id' => $this->user->id]);
+        $wallet = Wallet::factory()->create();
+        $wallet->update(['user_id' => $this->user->id]);
 
         $request = Request::create(
             '/api/v1/wallets',
@@ -111,7 +111,7 @@ class WalletsControllerTest extends TestCase
             return $this->user;
         });
 
-        $response = $this->walletsController->delete($request, $category->id);
+        $response = $this->walletsController->delete($request, $wallet->id);
 
         $this->assertEquals($response->getData()->status, 'success');
     }
