@@ -7,16 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Category extends Model
+class Goal extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'name',
-        'image',
         'type',
+        'date_begin',
+        'date_end',
+        'amount',
+        'description',
+        'is_important',
         'user_id',
-        'default',
+        'image',
     ];
 
     public function user(): BelongsTo
@@ -24,8 +28,8 @@ class Category extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function transactions(): HasMany
+    public function goal_additions(): HasMany
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(GoalAddition::class);
     }
 }

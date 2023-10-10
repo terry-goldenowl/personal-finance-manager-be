@@ -87,9 +87,9 @@ class WalletServiceTest extends TestCase
             $randomWallet->update(['user_id' => $this->user->id]);
         }
 
-        $resultData = $this->walletService->getBalance($this->user, $randomWallet->id);
+        $resultData = $this->walletService->getBalance($randomWallet->id);
 
-        $this->assertTrue($resultData >= 0);
+        $this->assertIsInt($resultData);
     }
 
     public function test_update_fail_not_found()

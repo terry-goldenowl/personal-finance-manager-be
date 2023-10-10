@@ -6,6 +6,8 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\CategoryPlan;
+use App\Models\Goal;
+use App\Models\GoalAddition;
 use App\Models\MonthPlan;
 use App\Models\Transaction;
 use App\Models\User;
@@ -46,5 +48,7 @@ class DatabaseSeeder extends Seeder
         Transaction::factory(10000)->create();
         MonthPlan::factory(100)->create();
         CategoryPlan::factory(300)->create();
+        Goal::factory(100)->create();
+        GoalAddition::factory(1200)->create();
     }
 }

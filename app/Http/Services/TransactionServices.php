@@ -202,10 +202,7 @@ class TransactionServices extends BaseService
                 StorageHelper::delete($imagePath);
             }
 
-            $deleted = $this->model::destroy($id);
-            if (! $deleted) {
-                return new FailedData('Can not delete transaction!');
-            }
+            $this->model::destroy($id);
 
             return new SuccessfulData('Delete transaction successfully!');
         } catch (Exception $error) {

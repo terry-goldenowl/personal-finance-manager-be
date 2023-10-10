@@ -49,8 +49,8 @@ class WalletServices extends BaseService
     public function get(User $user): object
     {
         try {
-            $wallets = $user->wallets()->get()->map(function ($wallet) use ($user) {
-                $balance = $this->getBalance($user, $wallet->id);
+            $wallets = $user->wallets()->get()->map(function ($wallet) {
+                $balance = $this->getBalance($wallet->id);
 
                 $wallet->balance = $balance;
 
@@ -63,10 +63,9 @@ class WalletServices extends BaseService
         }
     }
 
-    public function getBalance(User $user, int $walletId)
+    public function getBalance(int $walletId)
     {
-        $balance = $user->wallets()->where('id', $walletId)
-            ->with('transactions.category')
+        $transactionsTotalAmount = Wallet::where('id', $walletId)->with('transactions.category')
             ->get()
             ->map(function ($wallet) {
                 return $wallet->transactions->sum(function ($transaction) {
@@ -79,7 +78,9 @@ class WalletServices extends BaseService
             })
             ->sum();
 
-        return $balance;
+        $goalAdditionsContributions = $this->getById($walletId)->goal_additions()->sum('amount');
+
+        return $transactionsTotalAmount - $goalAdditionsContributions;
     }
 
     public function update(array $data, int $id): object

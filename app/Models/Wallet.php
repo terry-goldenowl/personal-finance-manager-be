@@ -28,8 +28,8 @@ class Wallet extends Model
         return $this->hasMany(Transaction::class);
     }
 
-    public function reports()
+    public function goal_additions(): HasMany
     {
-        return $this->hasMany(Report::class);
+        return $this->hasMany(GoalAddition::class);
     }
 }
