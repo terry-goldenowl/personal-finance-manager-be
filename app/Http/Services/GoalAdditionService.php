@@ -19,12 +19,12 @@ class GoalAdditionService extends BaseService
     {
         try {
             $goal = app(GoalService::class)->getById($goalId);
-            if (!$goal) {
+            if (! $goal) {
                 return new FailedData('Goal not found!');
             }
 
             $wallet = app(WalletServices::class)->getById($data['wallet_id']);
-            if (!$wallet) {
+            if (! $wallet) {
                 return new FailedData('Wallet not found!');
             }
 
@@ -34,7 +34,7 @@ class GoalAdditionService extends BaseService
             }
 
             if ($data['amount'] < 0 && abs($data['amount']) > $totalContributions) {
-                $message = "Goal's total contributions (" . $totalContributions . ') is not enough to perform this withdrawal!';
+                $message = "Goal's total contributions (".$totalContributions.') is not enough to perform this withdrawal!';
 
                 return new FailedData($message, ['amount' => $message]);
             }
@@ -42,7 +42,7 @@ class GoalAdditionService extends BaseService
             $walletBalance = app(WalletServices::class)->getBalance($wallet->id);
 
             if ($data['amount'] > $walletBalance) {
-                $message = "Wallet's balance (" . $walletBalance . ') is not enough to perform this addition!';
+                $message = "Wallet's balance (".$walletBalance.') is not enough to perform this addition!';
 
                 return new FailedData($message, ['amount' => $message]);
             }
@@ -62,7 +62,7 @@ class GoalAdditionService extends BaseService
         try {
             $goal = app(GoalService::class)->getById($goalId);
 
-            if (!$goal) {
+            if (! $goal) {
                 return new FailedData('Goal not found!');
             }
 
