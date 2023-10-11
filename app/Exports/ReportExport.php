@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Category;
 use App\Models\Transaction;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -45,10 +46,19 @@ class ReportExport implements FromCollection, ShouldAutoSize, WithColumnWidths, 
 
         for ($row = 3; $row <= $rowCount; $row++) {
             $cellRange = $typeColumn.$row;
+
+            $categoryCell = $sheet->getCell('F'.$row);
+            $category = Category::where('name', $categoryCell->getValue())->first();
+            if ($category->type !== 'incomes') {
+                $cellColor = 'F97315';
+            } else {
+                $cellColor = '22C55D';
+            }
+
             $sheet->getStyle($cellRange)->applyFromArray([
                 'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'EA580B'],
+                    'startColor' => ['rgb' => $cellColor],
                 ],
             ]);
         }
