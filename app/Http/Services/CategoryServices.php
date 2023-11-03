@@ -23,8 +23,10 @@ class CategoryServices extends BaseService
     public function create(User $user, array $data): object
     {
         try {
-            if (!in_array($data['type'], ['incomes', 'expenses'])) {
-                return new FailedData('Invalid type', ['type' => 'Type is invalid! Available types: [incomes, expenses]']);
+            $types = config('category.categorytypes');
+
+            if (!in_array($data['type'], $types)) {
+                return new FailedData('Invalid type', ['type' => 'Type is invalid! Available types: ' . implode(' / ', $types)]);
             }
 
             if ($this->checkExists($user->id, $data['name'])) {

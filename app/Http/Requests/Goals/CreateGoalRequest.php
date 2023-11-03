@@ -23,7 +23,7 @@ class CreateGoalRequest extends RequestRoot
     public function rules(): array
     {
         return [
-            'type' => 'required|string|in:saving,debt-reduction',
+            'type' => 'required|numeric',
             'name' => 'required|string',
             'description' => 'nullable|string',
             'date_begin' => 'required|date',

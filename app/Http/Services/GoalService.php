@@ -23,6 +23,12 @@ class GoalService extends BaseService
         try {
             $goalData = array_merge($data, ['user_id' => $user->id]);
 
+            $types = config('goal.goaltypes');
+
+            if (!in_array($data['type'], $types)) {
+                return new FailedData('Invalid type', ['type' => 'Type is invalid! Available types: ' . implode(' / ', $types)]);
+            }
+
             if ($this->checkExistsByName($goalData)) {
                 $message = 'Goal with this name is already exists!';
 
@@ -60,29 +66,27 @@ class GoalService extends BaseService
         try {
             $search = isset($inputs['search']) ? $inputs['search'] : null;
             $type = isset($inputs['type']) ? $inputs['type'] : null;
-            $status = isset($inputs['status']) ? $inputs['status'] : 'in-progress';
+            $status = isset($inputs['status']) ? $inputs['status'] : 2;
+
+            $statuses = config('goal.goalstatus');
+            $types = config('goal.goaltypes');
 
             $goals = $user->goals();
 
             if ($search) {
-                $goals->where('name', 'LIKE', '%'.$search.'%');
+                $goals->where('name', 'LIKE', '%' . $search . '%');
             }
 
-            $types = ['saving', 'debt-reduction'];
-
             if ($type) {
-                if (! in_array($type, $types)) {
+                if (!in_array($type, $types)) {
                     $message = 'Invalid goal type';
-
                     return new FailedData($message, ['type' => $message]);
                 }
                 $goals->where('type', $type);
             }
 
-            $statuses = ['not-started', 'in-progress', 'finished', 'not-completed'];
-            if (! in_array($status, $statuses)) {
+            if (!in_array($status, $statuses)) {
                 $message = 'Invalid goal status';
-
                 return new FailedData($message, ['status' => $message]);
             }
 
@@ -93,13 +97,13 @@ class GoalService extends BaseService
                 return $goal;
             });
 
-            if ($status === $statuses[0]) {
+            if ($status === 0) {
                 $goals = $goals->filter(function ($goal) {
                     return Carbon::today()->lt(Carbon::parse($goal->date_begin));
                 });
             }
 
-            if ($status === $statuses[1]) {
+            if ($status === 1) {
                 $goals = $goals->filter(function ($goal) {
                     return Carbon::today()->gte(Carbon::parse($goal->date_begin))
                         && Carbon::today()->lte(Carbon::parse($goal->date_end))
@@ -107,13 +111,13 @@ class GoalService extends BaseService
                 });
             }
 
-            if ($status === $statuses[2]) {
+            if ($status === 2) {
                 $goals = $goals->filter(function ($goal) {
                     return $goal->amount <= $goal->total_contributions;
                 });
             }
 
-            if ($status === $statuses[3]) {
+            if ($status === 3) {
                 $goals = $goals->filter(function ($goal) {
                     return Carbon::today()->gt(Carbon::parse($goal->date_end))
                         && $goal->amount > $goal->total_contributions;
@@ -200,7 +204,7 @@ class GoalService extends BaseService
             }
 
             $wallet = app(WalletServices::class)->getById($inputs['wallet_id']);
-            if (! $wallet) {
+            if (!$wallet) {
                 return new FailedData('Wallet not found!');
             }
 
@@ -230,11 +234,13 @@ class GoalService extends BaseService
     {
         try {
             $goal = $this->getById($id);
-            if (! $goal) {
+            if (!$goal) {
                 return new FailedData('Goal not found!');
             }
 
-            if ($data['status'] === 'not-started' && Carbon::parse($data['date_begin'])->lt(Carbon::today())) {
+            $statuses = config('goal.goalstatus');
+
+            if (strtoupper($data['status']) === $statuses[1]->value() && Carbon::parse($data['date_begin'])->lt(Carbon::today())) {
                 $message = 'Goal\'s begining date must be from today!';
 
                 return new FailedData($message, ['date_begin' => $message]);
@@ -271,7 +277,7 @@ class GoalService extends BaseService
         try {
             $goal = $this->getById($id);
 
-            if (! $goal) {
+            if (!$goal) {
                 return new FailedData('Goal not found!');
             }
 

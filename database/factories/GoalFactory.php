@@ -23,9 +23,11 @@ class GoalFactory extends Factory
         $dateBegin = fake()->dateTimeBetween('-1 year', '+1 year');
         $dateEnd = fake()->dateTimeInInterval($dateBegin, '+'.random_int(1, 1000).' days');
 
+        $types = config('goal.goaltypes');
+
         return [
             'name' => fake()->words(fake()->numberBetween(4, 10), true),
-            'type' => fake()->randomElement(['saving', 'debt-reduction']),
+            'type' => fake()->randomElement($types),
             'image' => fake()->randomElement([env('APP_URL').'/images/samples/goals/goal-'.random_int(1, 8).'.png', '']),
             'date_begin' => $dateBegin,
             'date_end' => $dateEnd,
