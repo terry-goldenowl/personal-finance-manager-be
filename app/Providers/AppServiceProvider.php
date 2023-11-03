@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Services\EventServices;
 use App\Http\Services\GoalAdditionService;
 use App\Http\Services\GoalService;
 use App\Services\AuthService;
@@ -29,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TransactionServices::class);
         $this->app->bind(GoalService::class);
         $this->app->bind(GoalAdditionService::class);
+        $this->app->bind(EventServices::class);
     }
 
     /**
