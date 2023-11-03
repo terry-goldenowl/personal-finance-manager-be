@@ -20,18 +20,10 @@ class CategoryServices extends BaseService
         parent::__construct(Category::class);
     }
 
-    public function checkExists(int $userId, string $name): bool
-    {
-        $isUserCategoryExists = Category::where('user_id', $userId)->where('name', $name)->exists();
-        $isDefaultCategoryExists = Category::whereNull('user_id')->where('name', $name)->exists();
-
-        return $isUserCategoryExists || $isDefaultCategoryExists;
-    }
-
     public function create(User $user, array $data): object
     {
         try {
-            if (! in_array($data['type'], ['incomes', 'expenses'])) {
+            if (!in_array($data['type'], ['incomes', 'expenses'])) {
                 return new FailedData('Invalid type', ['type' => 'Type is invalid! Available types: [incomes, expenses]']);
             }
 
@@ -75,9 +67,9 @@ class CategoryServices extends BaseService
                 ->orWhereNull('user_id')->select('name', DB::raw('count(*) as count'))->groupBy('name')->distinct()->get()->toArray();
 
             $categories = $categories->where('user_id', $user->id)->orWhereNull('user_id')->get()->filter(function ($category) use ($countNames, $default) {
-                if (! is_null($default)) {
+                if (!is_null($default)) {
                     if ($default == true) {
-                        $includeDefault = ! is_null($category->user_id);
+                        $includeDefault = !is_null($category->user_id);
                     } else {
                         $includeDefault = is_null($category->user_id);
                     }
@@ -123,7 +115,7 @@ class CategoryServices extends BaseService
                     ->where('categories.user_id', $user->id)->get()->pluck('name');
 
                 $categories = $categories->filter(function ($category) use ($existingNames) {
-                    return ! in_array($category->name, $existingNames->toArray());
+                    return !in_array($category->name, $existingNames->toArray());
                 })->values();
             }
 
@@ -163,7 +155,7 @@ class CategoryServices extends BaseService
             }
 
             if ($search) {
-                $categories->where('name', 'LIKE', '%'.$search.'%');
+                $categories->where('name', 'LIKE', '%' . $search . '%');
             }
 
             $categories = $categories->get()->map(function ($category) {
@@ -206,7 +198,7 @@ class CategoryServices extends BaseService
     {
         try {
             $category = $this->getById($id);
-            if (! $category) {
+            if (!$category) {
                 return new FailedData('Category not found!', ['error' => 'category']);
             }
 
@@ -238,7 +230,7 @@ class CategoryServices extends BaseService
         try {
             $category = $this->getById($id);
 
-            if (! $category) {
+            if (!$category) {
                 return new FailedData('Category not found!');
             }
 
@@ -275,7 +267,7 @@ class CategoryServices extends BaseService
         try {
             $category = $this->getById($id);
 
-            if (! $category) {
+            if (!$category) {
                 return new FailedData('Category not found!');
             }
 
@@ -285,7 +277,7 @@ class CategoryServices extends BaseService
             }
 
             $deleted = $this->model::destroy($id);
-            if (! $deleted) {
+            if (!$deleted) {
                 return new FailedData('Delete fails or category not found!');
             }
 
@@ -293,6 +285,14 @@ class CategoryServices extends BaseService
         } catch (Exception $error) {
             return new FailedData('Failed to delete default category!');
         }
+    }
+
+    public function checkExists(int $userId, string $name): bool
+    {
+        $isUserCategoryExists = Category::where('user_id', $userId)->where('name', $name)->exists();
+        $isDefaultCategoryExists = Category::whereNull('user_id')->where('name', $name)->exists();
+
+        return $isUserCategoryExists || $isDefaultCategoryExists;
     }
 
     public function checkExistsById(int $id): bool

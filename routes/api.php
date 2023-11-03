@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CategoriesController;
 use App\Http\Controllers\Api\v1\CategoryPlansController;
+use App\Http\Controllers\Api\v1\EventsController;
 use App\Http\Controllers\Api\v1\GoalAdditionsController;
 use App\Http\Controllers\Api\v1\GoalsController;
 use App\Http\Controllers\Api\v1\MonthPlansController;
@@ -85,6 +86,15 @@ Route::prefix('v1')->group(function () {
             // Goal additions
             Route::post('/goals/{goalId}/additions', [GoalAdditionsController::class, 'create'])->name('create-goal-addition');
             Route::get('/goals/{goalId}/additions', [GoalAdditionsController::class, 'get'])->name('get-goal-addition');
+
+            // Events
+            Route::post('/events', [EventsController::class, 'create'])->name('create-event');
+            Route::get('/events', [EventsController::class, 'get'])->name('get-events');
+            Route::patch('/events/{id}', [EventsController::class, 'update'])->name('update-event');
+            Route::delete('/events/{id}/with-transactions', [EventsController::class, 'deleteWithTransactions'])
+                ->name('delete-event-with-transactions');
+            Route::delete('/events/{id}/without-transactions', [EventsController::class, 'deleteWithoutTransactions'])
+                ->name('delete-event-without-transactions');
 
             // Users
             Route::delete('/users', [UserController::class, 'deleteUser'])->name('delete-user');
